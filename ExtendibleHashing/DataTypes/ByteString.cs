@@ -24,11 +24,11 @@ namespace ExtendibleHashing.DataTypes
             get => MaxLength;
             set
             {
-                if (MaxLength <= sizeof(byte))
+                if (MaxLength <= byte.MaxValue)
                 {
                     MaxLength = value;
                 }
-                throw new ArgumentException($"New {nameof(MaxLength)} is more than 255.");
+                throw new ArgumentException($"New {nameof(MaxLength)} is more than {byte.MaxValue}.");
             }
         }
 
@@ -52,7 +52,7 @@ namespace ExtendibleHashing.DataTypes
         public void FromByteArray(byte[] byteArray, int offset)
         {
             byte actualStringLength = byteArray[offset]; // Get actual number of valid characters
-            String = Encoding.ASCII.GetString(byteArray, offset + 1, actualStringLength);
+            String = Encoding.ASCII.GetString(byteArray, offset + sizeof(byte), actualStringLength);
         }
         public override string ToString() => String;
 

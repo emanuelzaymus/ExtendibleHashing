@@ -40,7 +40,7 @@ namespace ExtendibleHashing
 
             if (block.IsFull)
             {
-                throw new Exception(); // TODO
+                throw new Exception(); // TODO <-- continue here !
             }
             else
             {
@@ -93,6 +93,7 @@ namespace ExtendibleHashing
         private BitArray HashCodeToBitArray(int hashCode)
         {
             return new BitArray(BitConverter.GetBytes(hashCode));
+            //return new BitArray(BitConverter.GetBytes(hashCode)).And(new BitArray(new[] { true, true, true }));
         }
 
         private void Save(DataBlock<T> block)

@@ -2,7 +2,7 @@
 {
     class PropertyPosition : Property
     {
-        public PropertyPosition(int number, string description) : base(number, description)
+        public PropertyPosition(int id) : base(id)
         {
         }
     }

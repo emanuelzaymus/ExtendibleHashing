@@ -39,7 +39,11 @@ namespace ExtendibleHashing.ConsoleApp
 
         public byte[] ToByteArray()
         {
-            return _id.ToByteArray().Concat(_number.ToByteArray()).Concat(_description.ToByteArray()).ToArray();
+            // TODO: remake to Array.Copy
+            return _id.ToByteArray()
+                .Concat(_number.ToByteArray())
+                .Concat(_description.ToByteArray())
+                .ToArray();
         }
 
         public void FromByteArray(byte[] byteArray, int offset)

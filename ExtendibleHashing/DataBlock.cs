@@ -13,7 +13,6 @@ namespace ExtendibleHashing
         private readonly List<T> _items = new List<T>();
 
         public int InFilePosition { get; }
-        //public int Count => Items.Count;
 
         public DataBlock(int inFilePosition, int blockByteSize)
         {
