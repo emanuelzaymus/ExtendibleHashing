@@ -2,6 +2,7 @@
 using System.Collections;
 using System.IO;
 using System.Text;
+using ExtendibleHashing.DataTypes;
 using ExtendibleHashing.Extensions;
 
 namespace ExtendibleHashing.ConsoleApp
@@ -12,7 +13,15 @@ namespace ExtendibleHashing.ConsoleApp
 
         static void Main(string[] args)
         {
+            ExtendibleHashingFile<ByteInt> f = new ExtendibleHashingFile<ByteInt>(args[0], args[1], args[2]);
 
+            //f.Add(new ByteInt(8));
+
+            var found = f.Find(new ByteInt(8));
+
+            Console.WriteLine(found.Int);
+
+            return;
             //BitArray ba = new BitArray(BitConverter.GetBytes(5)); // ...0101
             //Console.WriteLine(ba.Length);
             //Console.WriteLine();

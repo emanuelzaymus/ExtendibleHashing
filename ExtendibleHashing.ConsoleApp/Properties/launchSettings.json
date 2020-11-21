@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "ExtendibleHashing.ConsoleApp": {
+      "commandName": "Project",
+      "commandLineArgs": "extensibleHashingFile.bin overfillingFile.bin managerFile.txt"
+    }
+  }
+}

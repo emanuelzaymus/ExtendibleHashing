@@ -3,7 +3,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 
 namespace ExtendibleHashing
 {
@@ -33,7 +32,6 @@ namespace ExtendibleHashing
             _managerFilePath = managerFilePath;
             _blockByteSize = blockByteSize;
             // Load initializing data from _managerFilePath
-
         }
 
         public void Add(T item)
@@ -42,7 +40,7 @@ namespace ExtendibleHashing
 
             if (block.IsFull)
             {
-                throw new Exception();
+                throw new Exception(); // TODO
             }
             else
             {
@@ -53,7 +51,8 @@ namespace ExtendibleHashing
 
         public T Find(T itemPosition)
         {
-            throw new NotImplementedException();
+            var block = GetDataBlock(itemPosition);
+            return block.Find(itemPosition);
         }
 
         public bool Remove(T itemPosition)
@@ -70,15 +69,17 @@ namespace ExtendibleHashing
 
         private DataBlock<T> GetDataBlock(T itemPosition)
         {
+            if (_file.Length == 0)
+            {
+                return new DataBlock<T>(0, _blockByteSize);
+            }
             BitArray bits = HashCodeToBitArray(itemPosition.GetHashCode());
             int index = bits.IntFromFirst(_numberOfRelevantBits);
 
             int position = _dataBlockPositions[index];
 
             byte[] data = ReadBlock(position);
-            DataBlock<T> ret = new DataBlock<T>(_blockByteSize);
-            ret.FromByteArray(data, 0);
-            throw new NotImplementedException();
+            return new DataBlock<T>(position, data);
         }
 
         private byte[] ReadBlock(int position)
@@ -96,7 +97,7 @@ namespace ExtendibleHashing
 
         private void Save(DataBlock<T> block)
         {
-            throw new NotImplementedException();
+            _file.Write(block.ToByteArray(), block.InFilePosition, block.ByteSize);
         }
 
     }
