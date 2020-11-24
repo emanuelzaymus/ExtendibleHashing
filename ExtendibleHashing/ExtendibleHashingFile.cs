@@ -6,18 +6,20 @@ using System.IO;
 
 namespace ExtendibleHashing
 {
-    public class ExtendibleHashingFile<T> : IDisposable where T : IBinarySerializable
+    public class ExtendibleHashingFile<T> : IDisposable, IEnumerable<T> where T : IBinarySerializable, new()
     {
         private readonly FileStream _file;
         private readonly FileStream _overfillFile;
         private readonly string _managerFilePath;
         private readonly int _blockByteSize;
 
-        private readonly List<int> _dataBlockPositions = new List<int>() { 0 };
-        private int _numberOfRelevantBits = 0;
+        private List<int> _blockAddresses = new List<int>() { 0 }; // adresar
+        private List<int> _blockBitDepths = new List<int>() { 0 }; // hlbky blokov
 
-        //private DataBlock<T> _actualBlock;
-        //private DataBlock<T> _hlpBlock;
+        private List<bool> _fileBlockOccupacity = new List<bool>() { false }; // obsadenost blokov --> musi byt v Managery TODO !!!
+
+        private int _fileBitDepth = 0; // hlbka suboru
+        //private int _fileByteSize = 0;
 
         /// <summary>
         /// </summary>
@@ -27,7 +29,8 @@ namespace ExtendibleHashing
         /// <param name="blockByteSize">Block size in bytes</param>
         public ExtendibleHashingFile(string filePath, string overfillingFilePath, string managerFilePath, int blockByteSize = 4096)
         {
-            _file = new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.ReadWrite);
+            //_file = new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.ReadWrite); // TODO change to FileMode.OpenOrCreate !
+            _file = new FileStream(filePath, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite, blockByteSize, FileOptions.WriteThrough);
             _overfillFile = new FileStream(overfillingFilePath, FileMode.OpenOrCreate, FileAccess.ReadWrite);
             _managerFilePath = managerFilePath;
             _blockByteSize = blockByteSize;
@@ -36,26 +39,34 @@ namespace ExtendibleHashing
 
         public void Add(T item)
         {
-            var block = GetDataBlock(item);
+            while (true)
+            {
+                var block = GetDataBlock(item);
 
-            if (block.IsFull)
-            {
-                throw new Exception(); // TODO <-- continue here !
-            }
-            else
-            {
-                block.Add(item);
-                Save(block); // Maybe I dont need to save every time - only when I'm changing loaded block.
+                if (block.IsFull)
+                {
+                    if (_fileBitDepth == block.BitDepth)
+                    {
+                        DoubleTheFileSize();
+                    }
+                    Split(block);
+                }
+                else
+                {
+                    block.Add(item);
+                    Save(block);
+                    break;
+                }
             }
         }
 
-        public T Find(T itemPosition)
+        public T Find(T itemAddress)
         {
-            var block = GetDataBlock(itemPosition);
-            return block.Find(itemPosition);
+            var block = GetDataBlock(itemAddress);
+            return block.Find(itemAddress);
         }
 
-        public bool Remove(T itemPosition)
+        public bool Remove(T itemAddress)
         {
             throw new NotImplementedException();
         }
@@ -67,26 +78,40 @@ namespace ExtendibleHashing
             // Write everithing necessary into _manageFilePath
         }
 
-        private DataBlock<T> GetDataBlock(T itemPosition)
+        private DataBlock<T> GetDataBlock(T itemAddress)
         {
             if (_file.Length == 0)
             {
-                return new DataBlock<T>(0, _blockByteSize);
+                return GetNewBlock(0);
             }
-            BitArray bits = HashCodeToBitArray(itemPosition.GetHashCode());
-            int index = bits.IntFromFirst(_numberOfRelevantBits);
+            BitArray bits = HashCodeToBitArray(itemAddress.GetHashCode());
+            int index = bits.IntFromFirst(_fileBitDepth);
 
-            int position = _dataBlockPositions[index];
+            int address = _blockAddresses[index];
 
-            byte[] data = ReadBlock(position);
-            return new DataBlock<T>(position, data);
+            byte[] data = ReadBlock(address);
+            return new DataBlock<T>(index, address, _blockBitDepths[index], data);
         }
 
-        private byte[] ReadBlock(int position)
+        private DataBlock<T> GetNewBlock(int index)
         {
-            _file.Seek(position, SeekOrigin.Begin);
+            int indexOfEmptyBlock = _fileBlockOccupacity.IndexOf(false);
+            _fileBlockOccupacity[indexOfEmptyBlock] = true;
+            if (indexOfEmptyBlock + 1 == _fileBlockOccupacity.Count)
+            {
+                _fileBlockOccupacity.Add(false);
+            }
+            int newAddress = indexOfEmptyBlock * _blockByteSize;
+            _blockAddresses[index] = newAddress;
+
+            return new DataBlock<T>(index, newAddress, _blockBitDepths[index], _blockByteSize);
+        }
+
+        private byte[] ReadBlock(int address)
+        {
+            _file.Seek(address, SeekOrigin.Begin);
             byte[] block = new byte[_blockByteSize];
-            _file.Read(block, position, _blockByteSize);
+            _file.Read(block, 0, _blockByteSize);
             return block;
         }
 
@@ -96,10 +121,70 @@ namespace ExtendibleHashing
             //return new BitArray(BitConverter.GetBytes(hashCode)).And(new BitArray(new[] { true, true, true }));
         }
 
-        private void Save(DataBlock<T> block)
+        private void DoubleTheFileSize()
         {
-            _file.Write(block.ToByteArray(), block.InFilePosition, block.ByteSize);
+            _blockAddresses = _blockAddresses.DoubleValues();
+            _blockBitDepths = _blockBitDepths.DoubleValues();
+            _fileBitDepth++;
         }
 
+        private void Split(DataBlock<T> block)
+        {
+            int index = block.Index;
+            _blockBitDepths[index]++;
+            _blockBitDepths[index + 1]++;
+
+            DataBlock<T> block1 = new DataBlock<T>(block.Index, block.InFileAddress, _blockBitDepths[block.Index], _blockByteSize);
+            DataBlock<T> block2 = GetNewBlock(index + 1);
+
+            foreach (var item in block)
+            {
+                BitArray bits = HashCodeToBitArray(item.GetHashCode());
+                int i = bits.IntFromFirst(_fileBitDepth);
+
+                if (i == block1.Index)
+                {
+                    block1.Add(item);
+                }
+                else if (i == block2.Index)
+                {
+                    block2.Add(item);
+                }
+                else throw new Exception("You should not get here");
+            }
+            Save(block1); // TODO: write at onece
+            Save(block2);
+        }
+
+        private void Save(DataBlock<T> block)
+        {
+            _file.Seek(block.InFileAddress, SeekOrigin.Begin);
+            _file.Write(block.ToByteArray(), 0, block.ByteSize);
+            _file.Flush(true);
+        }
+
+        public IEnumerator<T> GetEnumerator()
+        {
+            int lastAddr = -1;
+            foreach (var addr in _blockAddresses)
+            {
+                if (addr != lastAddr)
+                {
+                    lastAddr = addr;
+
+                    byte[] bytes = ReadBlock(addr);
+                    var block = new DataBlock<T>(bytes);
+                    foreach (var item in block)
+                    {
+                        yield return item;
+                    }
+                }
+            }
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
     }
 }

@@ -13,13 +13,21 @@ namespace ExtendibleHashing.ConsoleApp
 
         static void Main(string[] args)
         {
-            ExtendibleHashingFile<ByteInt> f = new ExtendibleHashingFile<ByteInt>(args[0], args[1], args[2]);
+            using (var f = new ExtendibleHashingFile<ByteInt>(args[0], args[1], args[2], 16))
+            {
+                f.Add(new ByteInt(49_344));
+                f.Add(new ByteInt(32_896));
+                f.Add(new ByteInt(1_094_795_585));
+                f.Add(new ByteInt(15));
 
-            //f.Add(new ByteInt(8));
+                foreach (var item in f)
+                {
+                    Console.WriteLine(item.Int);
+                }
 
-            var found = f.Find(new ByteInt(8));
-
-            Console.WriteLine(found.Int);
+                ByteInt found = f.Find(new ByteInt(192));
+                Console.WriteLine(found != null ? found.Int.ToString() : "null");
+            }
 
             return;
             //BitArray ba = new BitArray(BitConverter.GetBytes(5)); // ...0101

@@ -1,9 +1,10 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 
 namespace ExtendibleHashing
 {
-    class DataBlock<T> : IBinarySerializable where T : IBinarySerializable
+    class DataBlock<T> : IBinarySerializable, IEnumerable<T> where T : IBinarySerializable, new()
     {
         private const int ValidItemsCountByteSize = sizeof(int);
 
@@ -12,11 +13,15 @@ namespace ExtendibleHashing
         private readonly int _maxItemCount;
         private readonly List<T> _items = new List<T>();
 
-        public int InFilePosition { get; }
+        public int Index { get; }
+        public int InFileAddress { get; }
+        public int BitDepth { get; }
 
-        public DataBlock(int inFilePosition, int blockByteSize)
+        public DataBlock(int index, int inFileAddress, int bitDepth, int blockByteSize)
         {
-            InFilePosition = inFilePosition;
+            Index = index;
+            InFileAddress = inFileAddress;
+            BitDepth = bitDepth;
             _blockByteSize = blockByteSize;
 
             T defaultItem = (T)Activator.CreateInstance(typeof(T));
@@ -24,10 +29,13 @@ namespace ExtendibleHashing
             _maxItemCount = (_blockByteSize - ValidItemsCountByteSize) / _itemByteSize;
         }
 
-        public DataBlock(int inFilePosition, byte[] data) : this(inFilePosition, data.Length)
+        public DataBlock(int index, int inFileAddress, int bitDepth, byte[] data)
+            : this(index, inFileAddress, bitDepth, data.Length)
         {
             FromByteArray(data, 0);
         }
+
+        public DataBlock(byte[] data) : this(-1, -1, -1, data) { }
 
         public bool IsFull => _items.Count >= _maxItemCount;
 
@@ -36,11 +44,11 @@ namespace ExtendibleHashing
             _items.Add(item);
         }
 
-        public T Find(T itemPosition)
+        public T Find(T itemAddress)
         {
             foreach (var item in _items)
             {
-                if (item.Equals(itemPosition))
+                if (item.Equals(itemAddress))
                     return item;
             }
             return default;
@@ -74,6 +82,16 @@ namespace ExtendibleHashing
                 item.FromByteArray(byteArray, offset + ValidItemsCountByteSize + _itemByteSize * i);
                 _items.Add(item);
             }
+        }
+
+        public IEnumerator<T> GetEnumerator()
+        {
+            return _items.GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
         }
 
     }
