@@ -33,7 +33,7 @@ namespace ExtendibleHashing.Tests
 
         [TestMethod]
         [Timeout(20000)]
-        public void RandomFuzzyAdd()
+        public void FuzzyAdd_RandomSeeds()
         {
             for (int i = 0; i < 200; i++)
             {
@@ -94,7 +94,7 @@ namespace ExtendibleHashing.Tests
                             }
                             else
                             {
-                                int randId = RandomTownGenerator.RandomInt();
+                                int randId = RandomTownGenerator.RandomId();
                                 town = checkList.FirstOrDefault(x => x.Id == randId);
                                 Assert.AreEqual(town, file.Find(new TownId(randId)));
                             }

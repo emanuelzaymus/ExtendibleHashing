@@ -10,7 +10,7 @@ namespace ExtendibleHashing.Tests.TestClasses
 
         public static Town GenerateTown()
         {
-            return new Town(RandomInt(), RandomString(Random.Next(15, 21)));
+            return new Town(RandomId(), RandomName());
         }
 
         public static IEnumerable<Town> GenerateTowns(int count)
@@ -19,7 +19,11 @@ namespace ExtendibleHashing.Tests.TestClasses
                 yield return GenerateTown();
         }
 
-        public static int RandomInt() => Random.Next(int.MinValue, int.MaxValue);
+        public static int RandomId() => RandomInt();
+
+        private static string RandomName() => RandomString(Random.Next(15, 21));
+
+        private static int RandomInt() => Random.Next(int.MinValue, int.MaxValue);
 
         private static string RandomString(int length)
         {
