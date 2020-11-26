@@ -2,7 +2,7 @@
 
 namespace ExtendibleHashing.DataTypes
 {
-    public class ByteInt : IBinarySerializable
+    public class ByteInt : IData
     {
         public int Int { get; set; }
 
@@ -22,6 +22,12 @@ namespace ExtendibleHashing.DataTypes
             Int = BitConverter.ToInt32(byteArray, offset);
         }
 
+        public bool AddressEquals(object obj)
+        {
+            return obj is ByteInt byteInt &&
+                   Int == byteInt.Int;
+        }
+
         public override string ToString() => Int.ToString();
 
         public override bool Equals(object obj)
@@ -31,5 +37,6 @@ namespace ExtendibleHashing.DataTypes
         }
 
         public override int GetHashCode() => Int.GetHashCode();
+
     }
 }

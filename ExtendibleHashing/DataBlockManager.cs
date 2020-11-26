@@ -4,7 +4,7 @@ using System.Text;
 
 namespace ExtendibleHashing
 {
-    class DataBlockManager<T> where T : IBinarySerializable, new()
+    class DataBlockManager<T> where T : IData, new()
     {
         private List<int> _blockAddresses = new List<int>() { 0 }; // adresar
         private List<int> _blockBitDepths = new List<int>() { 0 }; // hlbky blokov

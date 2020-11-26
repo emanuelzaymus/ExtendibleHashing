@@ -13,7 +13,10 @@ namespace ExtendibleHashing.ConsoleApp
 
         static void Main(string[] args)
         {
-            using (var f = new ExtendibleHashingFile<ByteInt>(args[0], args[1], args[2], 16))
+            Console.WriteLine(0b_01_10_0100);
+            return;
+
+            using (var f = new ExtendibleHashingFile<ByteInt>(args[0], args[1], args[2], 16, FileMode.Create))
             {
                 f.Add(new ByteInt(49_344));
                 f.Add(new ByteInt(32_896));

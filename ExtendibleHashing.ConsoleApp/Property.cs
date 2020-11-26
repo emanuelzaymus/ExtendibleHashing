@@ -1,9 +1,10 @@
 ﻿using ExtendibleHashing.DataTypes;
+using System;
 using System.Linq;
 
 namespace ExtendibleHashing.ConsoleApp
 {
-    class Property : IBinarySerializable
+    class Property : IData
     {
         private const int DescriptionLength = 20;
         private static int NextId = 1; // TODO: Need to store it externally
@@ -53,6 +54,12 @@ namespace ExtendibleHashing.ConsoleApp
             _description.FromByteArray(byteArray, offset + _id.ByteSize + _number.ByteSize);
         }
 
+        public bool AddressEquals(object obj)
+        {
+            return obj is Property property &&
+                Id == property.Id;
+        }
+
         public override string ToString()
         {
             return $"Id:{Id}, Number:{Number}, Desc:{Description}";
@@ -61,9 +68,12 @@ namespace ExtendibleHashing.ConsoleApp
         public override bool Equals(object obj)
         {
             return obj is Property property &&
-                Id == property.Id;
+                   Id == property.Id &&
+                   Number == property.Number &&
+                   Description == property.Description;
         }
 
         public override int GetHashCode() => Id;
+
     }
 }

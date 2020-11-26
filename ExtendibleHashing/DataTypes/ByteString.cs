@@ -1,67 +1,74 @@
 ﻿using System;
 using System.Text;
-using System.Linq;
 
 namespace ExtendibleHashing.DataTypes
 {
-    public class ByteString : IBinarySerializable
+    public class ByteString : IData
     {
+        private const int ByteSizeOfCharacter = 2;
+
+        private string _string;
+
+        public int MaxLength { get; set; }
+
         public string String
         {
-            get => String;
+            get => _string;
             set
             {
-                if (value.Length <= MaxLength)
+                if (value == null || value.Length <= MaxLength)
                 {
-                    String = value;
+                    _string = value;
                 }
-                throw new ArgumentException("New value is larger than it's Length.");
+                else throw new ArgumentException("New value is larger than it's MaxLength.");
             }
         }
 
-        public int MaxLength
-        {
-            get => MaxLength;
-            set
-            {
-                if (MaxLength <= byte.MaxValue)
-                {
-                    MaxLength = value;
-                }
-                throw new ArgumentException($"New {nameof(MaxLength)} is more than {byte.MaxValue}.");
-            }
-        }
+        public ByteString(int maxLength) : this(maxLength, default) { }
 
-        public ByteString(int maxLength) : this(default, maxLength) { }
-
-        public ByteString(string @string, int maxLength)
+        public ByteString(int maxLength, string @string)
         {
-            String = @string;
             MaxLength = maxLength;
+            String = @string;
         }
 
-        public int ByteSize => sizeof(byte) + MaxLength; // byte for actual number of valid characters + MaxLength
+        public int ByteSize => sizeof(int) + MaxLength * ByteSizeOfCharacter; // byte for actual number of valid characters + MaxLength
 
         public byte[] ToByteArray()
         {
-            return (new byte[] { (byte)String.Length }) // Save actual number of valid characters
-                .Concat(Encoding.ASCII.GetBytes(String + new string('#', MaxLength - String.Length)))
-                .ToArray();
+            var ret = new byte[ByteSize];
+            string str = String ?? "";
+            Array.Copy(BitConverter.GetBytes(str.Length), 0, ret, 0, sizeof(int));// Save actual number of valid characters
+            Array.Copy(Encoding.Unicode.GetBytes(str + new string('#', MaxLength - str.Length)), 0,
+                ret, sizeof(int), MaxLength * ByteSizeOfCharacter);
+            return ret;
         }
 
         public void FromByteArray(byte[] byteArray, int offset)
         {
-            byte actualStringLength = byteArray[offset]; // Get actual number of valid characters
-            String = Encoding.ASCII.GetString(byteArray, offset + sizeof(byte), actualStringLength);
+            int actualStringLength = BitConverter.ToInt32(byteArray, offset); // Get actual number of valid characters
+            String = Encoding.Unicode.GetString(byteArray, offset + sizeof(int), actualStringLength * ByteSizeOfCharacter);
         }
+
+        public bool AddressEquals(object obj)
+        {
+            return obj is ByteString byteString &&
+                   String == byteString.String;
+        }
+
         public override string ToString() => String;
 
         public override bool Equals(object obj)
         {
             return obj is ByteString @string &&
-                   String == @string.String;
+                   String == @string.String &&
+                   MaxLength == @string.MaxLength;
         }
 
-        public override int GetHashCode() => String.GetHashCode();
+        public override int GetHashCode()
+        {
+            return String != null ? String.GetHashCode() : 0;
+        }
+
     }
 }

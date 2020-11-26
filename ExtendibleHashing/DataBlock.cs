@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace ExtendibleHashing
 {
-    class DataBlock<T> : IBinarySerializable, IEnumerable<T> where T : IBinarySerializable, new()
+    class DataBlock<T> : IBinarySerializable, IEnumerable<T> where T : IData, new()
     {
         private const int ValidItemsCountByteSize = sizeof(int);
 
@@ -13,7 +13,7 @@ namespace ExtendibleHashing
         private readonly int _maxItemCount;
         private readonly List<T> _items = new List<T>();
 
-        public int Index { get; }
+        public int Index { get; set; }
         public int InFileAddress { get; }
         public int BitDepth { get; }
 
@@ -48,7 +48,7 @@ namespace ExtendibleHashing
         {
             foreach (var item in _items)
             {
-                if (item.Equals(itemAddress))
+                if (item.AddressEquals(itemAddress))
                     return item;
             }
             return default;

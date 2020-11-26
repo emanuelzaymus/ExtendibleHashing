@@ -6,7 +6,7 @@ using System.IO;
 
 namespace ExtendibleHashing
 {
-    public class ExtendibleHashingFile<T> : IDisposable, IEnumerable<T> where T : IBinarySerializable, new()
+    public class ExtendibleHashingFile<T> : IDisposable, IEnumerable<T> where T : IData, new()
     {
         private readonly FileStream _file;
         private readonly FileStream _overfillFile;
@@ -27,11 +27,11 @@ namespace ExtendibleHashing
         /// <param name="overfillingFilePath"></param>
         /// <param name="managerFilePath"></param>
         /// <param name="blockByteSize">Block size in bytes</param>
-        public ExtendibleHashingFile(string filePath, string overfillingFilePath, string managerFilePath, int blockByteSize = 4096)
+        public ExtendibleHashingFile(string filePath, string overfillingFilePath, string managerFilePath,
+            int blockByteSize = 4096, FileMode fileMode = FileMode.OpenOrCreate)
         {
-            //_file = new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.ReadWrite); // TODO change to FileMode.OpenOrCreate !
-            _file = new FileStream(filePath, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite, blockByteSize, FileOptions.WriteThrough);
-            _overfillFile = new FileStream(overfillingFilePath, FileMode.OpenOrCreate, FileAccess.ReadWrite);
+            _file = new FileStream(filePath, fileMode, FileAccess.ReadWrite, FileShare.ReadWrite, blockByteSize, FileOptions.WriteThrough);
+            _overfillFile = new FileStream(overfillingFilePath, fileMode, FileAccess.ReadWrite);
             _managerFilePath = managerFilePath;
             _blockByteSize = blockByteSize;
             // Load initializing data from _managerFilePath
@@ -48,6 +48,7 @@ namespace ExtendibleHashing
                     if (_fileBitDepth == block.BitDepth)
                     {
                         DoubleTheFileSize();
+                        block.Index *= 2;
                     }
                     Split(block);
                 }
@@ -85,7 +86,7 @@ namespace ExtendibleHashing
                 return GetNewBlock(0);
             }
             BitArray bits = HashCodeToBitArray(itemAddress.GetHashCode());
-            int index = bits.IntFromFirst(_fileBitDepth);
+            int index = bits.IntFromNMostSignificantBits(_fileBitDepth);
 
             int address = _blockAddresses[index];
 
@@ -115,6 +116,14 @@ namespace ExtendibleHashing
             return block;
         }
 
+        private int HashCodeToIndex(int hashCode)
+        {
+            BitArray bits = HashCodeToBitArray(hashCode);
+            BitArray firstNBits = bits.FirstNLeastSignificantBits(_fileBitDepth);
+            BitArray reversed = firstNBits.ReverseBits();
+            return reversed.ToInt();
+        }
+
         private BitArray HashCodeToBitArray(int hashCode)
         {
             return new BitArray(BitConverter.GetBytes(hashCode));
@@ -140,7 +149,7 @@ namespace ExtendibleHashing
             foreach (var item in block)
             {
                 BitArray bits = HashCodeToBitArray(item.GetHashCode());
-                int i = bits.IntFromFirst(_fileBitDepth);
+                int i = bits.IntFromNMostSignificantBits(_fileBitDepth);
 
                 if (i == block1.Index)
                 {
