@@ -3,7 +3,7 @@ using System;
 
 namespace ExtendibleHashing.Tests.TestClasses
 {
-    class Town : IData
+    public class Town : IData
     {
         private ByteInt _id = new ByteInt();
         private ByteString _name = new ByteString(20);

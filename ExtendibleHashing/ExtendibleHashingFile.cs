@@ -86,7 +86,7 @@ namespace ExtendibleHashing
                 return GetNewBlock(0);
             }
             // TODO Co ak bude chciet vkladat do nealokovaneho bloku?????
-            int index = HashCodeToIndex(itemAddress.GetHashCode(), _fileBitDepth);
+            int index = HashCodeToIndex(itemAddress.GetHashCode());
             int address = _blockAddresses[index];
 
             byte[] data = ReadBlock(address);
@@ -115,10 +115,10 @@ namespace ExtendibleHashing
             return block;
         }
 
-        private int HashCodeToIndex(int hashCode, int bitDepth)
+        private int HashCodeToIndex(int hashCode)
         {
             BitArray bits = HashCodeToBitArray(hashCode);
-            BitArray firstNBits = bits.FirstNLeastSignificantBits(bitDepth);
+            BitArray firstNBits = bits.FirstNLeastSignificantBits(_fileBitDepth);
             BitArray reversed = firstNBits.ReverseBits();
             return reversed.ToInt();
         }
@@ -136,25 +136,47 @@ namespace ExtendibleHashing
             _fileBitDepth++;
         }
 
+        // rozbi to na niekolo metod ! TODO
         private void Split(DataBlock<T> block)
         {
-            int index = block.Index;
-            _blockBitDepths[index]++;
-            _blockBitDepths[index + 1]++;
-            int bitDepth = _blockBitDepths[index];
+            // Find first index of this
+            int firstIndexOfAddress = block.Index;
+            while (firstIndexOfAddress > 0 && _blockAddresses[firstIndexOfAddress - 1] == block.InFileAddress)
+            {
+                firstIndexOfAddress--;
+            }
+
+            // Increment all blocks which has the same address
+            int increaseFrom = firstIndexOfAddress;
+            int countOfBlocksHavingSameAddress = (int)Math.Pow(2, _fileBitDepth - block.BitDepth);
+            int increaseToExcluding = increaseFrom + countOfBlocksHavingSameAddress;
+            for (int i = increaseFrom; i < increaseToExcluding; i++)
+            {
+                _blockBitDepths[i]++;
+            }
+
+            int updateNewAddressFrom = increaseFrom + (increaseToExcluding - increaseFrom) / 2;
+            int updateNewAddressToExcliding = increaseToExcluding;
 
             DataBlock<T> block1 = new DataBlock<T>(block.Index, block.InFileAddress, _blockBitDepths[block.Index], _blockByteSize);
-            DataBlock<T> block2 = GetNewBlock(index + 1);
+            DataBlock<T> block2 = GetNewBlock(updateNewAddressFrom);
+
+            // Update the second half of edited blocks with new block address
+            for (int i = updateNewAddressFrom; i < updateNewAddressToExcliding; i++)
+            {
+                _blockAddresses[i] = block2.InFileAddress;
+            }
 
             foreach (var item in block)
             {
-                int i = HashCodeToIndex(item.GetHashCode(), bitDepth);
+                int ind = HashCodeToIndex(item.GetHashCode());
+                int address = _blockAddresses[ind];
 
-                if (i == block1.Index)
+                if (address == block1.InFileAddress)
                 {
                     block1.Add(item);
                 }
-                else if (i == block2.Index)
+                else if (address == block2.InFileAddress)
                 {
                     block2.Add(item);
                 }
