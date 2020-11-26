@@ -85,9 +85,8 @@ namespace ExtendibleHashing
             {
                 return GetNewBlock(0);
             }
-            BitArray bits = HashCodeToBitArray(itemAddress.GetHashCode());
-            int index = bits.IntFromNMostSignificantBits(_fileBitDepth);
-
+            // TODO Co ak bude chciet vkladat do nealokovaneho bloku?????
+            int index = HashCodeToIndex(itemAddress.GetHashCode(), _fileBitDepth);
             int address = _blockAddresses[index];
 
             byte[] data = ReadBlock(address);
@@ -116,10 +115,10 @@ namespace ExtendibleHashing
             return block;
         }
 
-        private int HashCodeToIndex(int hashCode)
+        private int HashCodeToIndex(int hashCode, int bitDepth)
         {
             BitArray bits = HashCodeToBitArray(hashCode);
-            BitArray firstNBits = bits.FirstNLeastSignificantBits(_fileBitDepth);
+            BitArray firstNBits = bits.FirstNLeastSignificantBits(bitDepth);
             BitArray reversed = firstNBits.ReverseBits();
             return reversed.ToInt();
         }
@@ -142,14 +141,14 @@ namespace ExtendibleHashing
             int index = block.Index;
             _blockBitDepths[index]++;
             _blockBitDepths[index + 1]++;
+            int bitDepth = _blockBitDepths[index];
 
             DataBlock<T> block1 = new DataBlock<T>(block.Index, block.InFileAddress, _blockBitDepths[block.Index], _blockByteSize);
             DataBlock<T> block2 = GetNewBlock(index + 1);
 
             foreach (var item in block)
             {
-                BitArray bits = HashCodeToBitArray(item.GetHashCode());
-                int i = bits.IntFromNMostSignificantBits(_fileBitDepth);
+                int i = HashCodeToIndex(item.GetHashCode(), bitDepth);
 
                 if (i == block1.Index)
                 {

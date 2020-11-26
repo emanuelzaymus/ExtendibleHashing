@@ -5,68 +5,6 @@ namespace ExtendibleHashing.Extensions
 {
     public static class BitArrayExtensions
     {
-        /// <summary>
-        /// Returns number from n most significant bits.
-        /// </summary>
-        /// <param name="bitArray"></param>
-        /// <param name="nBits"></param>
-        /// <returns></returns>
-        //public static int IntFromNMostSignificantBits(this BitArray bitArray, int nBits)
-        //{
-        //    if (nBits > bitArray.Length || nBits < 0)
-        //        throw new ArgumentOutOfRangeException(nameof(nBits));
-
-        //    int ret = 0;
-        //    for (int i = 0; i < nBits && i < bitArray.Length; i++)
-        //    {
-        //        if (bitArray[i])
-        //            ret += (int)Math.Pow(2, nBits - i - 1);
-        //    }
-        //    return ret;
-        //}
-
-        //public static int IntFromNLeastSignificantBits(this BitArray bitArray, int nBits)
-        //{
-        //    int ret = 0;
-        //    int len = bitArray.Length;
-        //    for (int i = nBits - 1; i >= 0; i--)
-        //    {
-        //        if (i < len && bitArray[i])
-        //        {
-        //            ret += (int)Math.Pow(2, len - i - 1);
-        //        }
-        //    }
-        //    return ret;
-
-        //    //if (nBits > bitArray.Length || nBits < 0)
-        //    //    throw new ArgumentOutOfRangeException(nameof(nBits));
-
-        //    //int ret = 0;
-        //    //for (int i = 0; i < nBits && i < bitArray.Length; i++)
-        //    //{
-        //    //    if (bitArray[i])
-        //    //        ret += (int)Math.Pow(2, nBits - i - 1);
-        //    //}
-        //    //return ret;
-        //}
-
-
-
-        //public static int IntFromFirst(this BitArray bitArray, int nBits)
-        //{
-        //    if (nBits > bitArray.Length || nBits < 0)
-        //        throw new ArgumentOutOfRangeException(nameof(nBits));
-
-        //    int ret = 0;
-        //    for (int i = 0; i < nBits && i < bitArray.Length; i++)
-        //    {
-        //        if (bitArray[i])
-        //            ret += (int)Math.Pow(2, nBits - i - 1);
-        //    }
-        //    return ret;
-        //}
-
-        ////////////////////////////////////////////
 
         public static BitArray FirstNLeastSignificantBits(this BitArray bitArray, int nBits)
         {

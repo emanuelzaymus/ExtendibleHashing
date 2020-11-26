@@ -8,59 +8,6 @@ namespace ExtendibleHashing.Tests.Extensions
     [TestClass]
     public class BitArrayExtensionsTests
     {
-        //[TestMethod]
-        //public void IntFromFirst_NBitsIsValid_ShouldReturnRightValue()
-        //{
-        //    BitArray bitArray = new BitArray(new[] { 253 }); // 1111 1101
-        //    int res = bitArray.IntFromNMostSignificantBits(4);
-        //    Assert.AreEqual(13, res); // 0000 1101
-
-        //    bitArray = new BitArray(new[] { 15 }); // 0000 1111
-        //    res = bitArray.IntFromNMostSignificantBits(3);
-        //    Assert.AreEqual(7, res);
-        //}
-
-        //[TestMethod]
-        //public void IntFromFirst_NBitsIsIntLength_ShouldReturnWholeValue()
-        //{
-        //    BitArray bitArray = new BitArray(29); // 0001 1101
-        //    int res = bitArray.IntFromNMostSignificantBits(32);
-        //    Assert.AreEqual(29, res); // 0001 1101
-        //}
-
-        //[TestMethod]
-        //public void IntFromFirst_NBitsIsZero_ShouldReturnZero()
-        //{
-        //    BitArray bitArray = new BitArray(255);
-        //    int res = bitArray.IntFromNMostSignificantBits(0);
-        //    Assert.AreEqual(0, res);
-        //}
-
-        //[TestMethod]
-        //public void IntFromFirst_NBitsIsAboveBitArayLength_ShouldReturnZero()
-        //{
-        //    BitArray bitArray = new BitArray(255);
-        //    Assert.ThrowsException<ArgumentOutOfRangeException>(() => bitArray.IntFromNMostSignificantBits(100));
-        //}
-
-        //[TestMethod]
-        //public void IntFromFirst_NBitsIsNegative_ShouldReturnZero()
-        //{
-        //    BitArray bitArray = new BitArray(255);
-        //    Assert.ThrowsException<ArgumentOutOfRangeException>(() => bitArray.IntFromNMostSignificantBits(-10));
-        //}
-
-        //[TestMethod]
-        //public void IntFromFirst_BitArray15_ShouldReturn7()
-        //{
-        //    BitArray bitArray = new BitArray(new[] { true, true, true, true, false, false, false, false }); // 15 ???
-        //    int res = bitArray.IntFromNMostSignificantBits(3);
-        //    Assert.AreEqual(7, res);
-        //}
-
-
-
-        ///////////////////////////////////////
 
         [TestMethod]
         public void FirstNLeastSignificantBits_ValidValues_ShouldReturnShortenBitArray()
@@ -171,9 +118,6 @@ namespace ExtendibleHashing.Tests.Extensions
             BitArray bitArray = new BitArray(new[] { 1, 1 }); // 0000_0000_0000_0001 0000_0000_0000_0001
             Assert.ThrowsException<ArgumentException>(() => bitArray.ToInt());
         }
-
-
-
 
     }
 }

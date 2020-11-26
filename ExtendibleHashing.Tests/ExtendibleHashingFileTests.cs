@@ -54,8 +54,9 @@ namespace ExtendibleHashing.Tests
         {
             var f = GetExtendibleHashingFileFilled();
             var expected = new[] { "Žilina", "Poprad", "Ilava", "Brezno", "Košice", "Lučenec", "Nitra",
-                "Martin", "Púchov", "Levice", "Trnava", "Snina", "Senica", "Zvolen", "Prešov" };
-            CollectionAssert.AreEqual(expected, f.Select(t => t.Name).ToArray());
+                "Martin", "Levice", "Trnava", "Snina", "Senica", "Púchov", "Zvolen", "Prešov" };
+            var actual = f.Select(t => t.Name).ToArray();
+            CollectionAssert.AreEqual(expected, actual);
         }
 
     }
