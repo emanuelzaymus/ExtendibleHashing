@@ -13,7 +13,7 @@ namespace ExtendibleHashing.Tests
         private const string ManagerFilePath = "test_managerFile.txt";
         private const int BlockByteSize = 256; // (Town.ByteSize = 48) * 5
 
-        protected ExtendibleHashingFile<Town> GetExtendibleHashingFile()
+        public static ExtendibleHashingFile<Town> GetExtendibleHashingFile()
         {
             return new ExtendibleHashingFile<Town>(FilePath, OverfillingFilePath, ManagerFilePath, BlockByteSize, FileMode.Create);
         }
@@ -37,6 +37,37 @@ namespace ExtendibleHashing.Tests
             f.Add(new Town(0b_1111_0000, "Ilava"));
             f.Add(new Town(0b_0011_1100, "Brezno"));
             return f;
+        }
+
+        [TestMethod]
+        public void LoadingFiles_ValidFiles_ShouldLoadAllDataFromFiles()
+        {
+            var f = GetExtendibleHashingFileFilled();
+            f.Dispose();
+            using (f = new ExtendibleHashingFile<Town>(FilePath, OverfillingFilePath, ManagerFilePath))
+            {
+                var expected = new[] {
+                    "Žilina", "Poprad", "Ilava", "Brezno",
+                    "Košice", "Lučenec", "Nitra",
+                    "Martin",
+                    "Levice", "Trnava", "Snina", "Senica", "Púchov",
+                    "Zvolen", "Prešov"
+                };
+                var actual = f.Select(t => t.Name).ToArray();
+                CollectionAssert.AreEqual(expected, actual);
+
+                f.Add(new Town(0b0000_1110, "My Town 1")); // address: 011
+                f.Add(new Town(0b1000_1110, "My Town 2")); // address: 011
+                expected = new[] {
+                    "Žilina", "Poprad", "Ilava", "Brezno",
+                    "Košice", "Lučenec", "Nitra", "My Town 1", "My Town 2",
+                    "Martin",
+                    "Levice", "Trnava", "Snina", "Senica", "Púchov",
+                    "Zvolen", "Prešov"
+                };
+                actual = f.Select(t => t.Name).ToArray();
+                CollectionAssert.AreEqual(expected, actual);
+            }
         }
 
         [TestMethod]

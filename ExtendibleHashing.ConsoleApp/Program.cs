@@ -13,6 +13,11 @@ namespace ExtendibleHashing.ConsoleApp
 
         static void Main(string[] args)
         {
+            var fffff = new FileStream("SKUSKA.txt", FileMode.Create, FileAccess.ReadWrite);
+
+            Console.WriteLine(fffff.Length);
+
+            return;
             using (var f = new ExtendibleHashingFile<ByteInt>(args[0], args[1], args[2], 16, FileMode.Create))
             {
                 f.Add(new ByteInt(49_344));

@@ -7,11 +7,11 @@ using System;
 namespace ExtendibleHashing.Tests
 {
     [TestClass]
-    public class ExtendibleHashingFileFuzzyTests : ExtendibleHashingFileTests
+    public class ExtendibleHashingFileFuzzyTests
     {
         private ExtendibleHashingFile<Town> GetExtendibleHashingFile(IEnumerable<Town> towns)
         {
-            var file = GetExtendibleHashingFile();
+            var file = ExtendibleHashingFileTests.GetExtendibleHashingFile();
             foreach (var t in towns)
             {
                 file.Add(t);

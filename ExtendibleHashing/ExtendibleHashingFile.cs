@@ -10,16 +10,15 @@ namespace ExtendibleHashing
     {
         private readonly FileStream _file;
         private readonly FileStream _overfillFile;
-        private readonly string _managerFilePath;
+        private readonly TextFileHandler _managerFile;
         private readonly int _blockByteSize;
 
-        private List<int> _blockAddresses = new List<int>() { 0 }; // adresar
-        private List<int> _blockBitDepths = new List<int>() { 0 }; // hlbky blokov
+        private List<int> _blockAddresses = new List<int>() { 0, 0 }; // adresar
+        private List<int> _blockBitDepths = new List<int>() { 0, 0 }; // hlbky blokov
 
-        private List<bool> _fileBlockOccupacity = new List<bool>() { false }; // obsadenost blokov --> musi byt v Managery TODO !!!
+        private readonly List<bool> _fileBlockOccupacity = new List<bool>() { true, false }; // obsadenost blokov --> musi byt v Managery TODO !!!
 
-        private int _fileBitDepth = 0; // hlbka suboru
-        //private int _fileByteSize = 0;
+        private int _fileBitDepth = 1; // hlbka suboru
 
         /// <summary>
         /// </summary>
@@ -32,9 +31,24 @@ namespace ExtendibleHashing
         {
             _file = new FileStream(filePath, fileMode, FileAccess.ReadWrite, FileShare.ReadWrite, blockByteSize, FileOptions.WriteThrough);
             _overfillFile = new FileStream(overfillingFilePath, fileMode, FileAccess.ReadWrite);
-            _managerFilePath = managerFilePath;
             _blockByteSize = blockByteSize;
-            // Load initializing data from _managerFilePath
+
+            _managerFile = new TextFileHandler(managerFilePath);
+            if (fileMode != FileMode.Create &&
+                fileMode != FileMode.CreateNew &&
+                _managerFile.Read(out int bByteSize, out var bAddresses, out var bBitDepths, out var fBlockOccupacity, out int fBitDepth))
+            {
+                _blockByteSize = bByteSize;
+                _blockAddresses = bAddresses;
+                _blockBitDepths = bBitDepths;
+                _fileBlockOccupacity = fBlockOccupacity;
+                _fileBitDepth = fBitDepth;
+            }
+
+            if (_file.Length < _blockByteSize)
+            {
+                Save(new DataBlock<T>(0, 0, 1, _blockByteSize));
+            }
         }
 
         public void Add(T item)
@@ -76,16 +90,11 @@ namespace ExtendibleHashing
         {
             _file.Dispose();
             _overfillFile.Dispose();
-            // Write everithing necessary into _manageFilePath
+            _managerFile.Write(_blockByteSize, _blockAddresses, _blockBitDepths, _fileBlockOccupacity, _fileBitDepth);
         }
 
         private DataBlock<T> GetDataBlock(T itemAddress)
         {
-            if (_file.Length == 0)
-            {
-                return GetNewBlock(0);
-            }
-            // TODO Co ak bude chciet vkladat do nealokovaneho bloku?????
             int index = HashCodeToIndex(itemAddress.GetHashCode());
             int address = _blockAddresses[index];
 
@@ -126,7 +135,6 @@ namespace ExtendibleHashing
         private BitArray HashCodeToBitArray(int hashCode)
         {
             return new BitArray(BitConverter.GetBytes(hashCode));
-            //return new BitArray(BitConverter.GetBytes(hashCode)).And(new BitArray(new[] { true, true, true }));
         }
 
         private void DoubleTheFileSize()
