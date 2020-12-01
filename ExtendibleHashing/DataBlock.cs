@@ -1,5 +1,6 @@
 ﻿using ExtendibleHashing.DataInterfaces;
 using System;
+using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -45,14 +46,33 @@ namespace ExtendibleHashing
             _items.Add(item);
         }
 
-        public T Find(T itemAddress)
+        public T Find(T itemId)
         {
-            foreach (var item in _items)
+            List<T> foundItems = _items.FindAll(i => i.IdEquals(itemId));
+            if (foundItems.Count == 1)
             {
-                if (item.IdEquals(itemAddress))
-                    return item;
+                return foundItems[0];
             }
-            return default;
+            else if (foundItems.Count == 0)
+            {
+                return default;
+            }
+            throw new Exception("There is more items with the same IDs.");
+        }
+
+        public bool Contains(T itemId)
+        {
+            return Find(itemId) != null;
+        }
+
+        public bool Remove(T itemId)
+        {
+            if (Contains(itemId))
+            {
+                _items.RemoveAll(i => i.IdEquals(itemId));
+                return true;
+            }
+            return false;
         }
 
         public int ByteSize => _blockByteSize;

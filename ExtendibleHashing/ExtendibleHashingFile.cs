@@ -10,7 +10,7 @@ namespace ExtendibleHashing
 {
     public class ExtendibleHashingFile<T> : IDisposable, IEnumerable<T> where T : IData, new()
     {
-        private readonly TextFileHandler _managerFile;
+        private readonly TextFileHandler _managingFile;
         private readonly DataBlockFile<T> _file;
         //private readonly FileStream _overfillFile;
 
@@ -23,8 +23,8 @@ namespace ExtendibleHashing
         public ExtendibleHashingFile(string filePath, string overfillingFilePath, string managerFilePath,
             int blockByteSize = 4096, FileMode fileMode = FileMode.OpenOrCreate)
         {
-            _managerFile = new TextFileHandler(managerFilePath);
-            _file = new DataBlockFile<T>(filePath, fileMode, blockByteSize, _managerFile, new BitHashing());
+            _managingFile = new TextFileHandler(managerFilePath);
+            _file = new DataBlockFile<T>(filePath, fileMode, blockByteSize, _managingFile, new BitHashing());
         }
 
         public void Add(T item)
@@ -51,20 +51,35 @@ namespace ExtendibleHashing
             }
         }
 
-        public T Find(T itemAddress)
+        public T Find(T itemId)
         {
-            var block = _file.GetDataBlock(itemAddress);
-            return block.Find(itemAddress);
+            var block = _file.GetDataBlock(itemId);
+            return block.Find(itemId);
         }
 
-        public bool Remove(T itemAddress)
+        public bool Remove(T itemId)
         {
+            var block = _file.GetDataBlock(itemId);
+            if (block.Remove(itemId))
+            {
+                _file.TryMerge(block);
+                return true;
+            }
+            return false;
+        }
+
+        public bool Update(T oldItem, T newItem)
+        {
+            if (oldItem.IdEquals(newItem))
+            {
+                throw new ArgumentException($"Parameters {nameof(oldItem)} and {nameof(newItem)} does not equal in ID attributes.");
+            }
             throw new NotImplementedException();
         }
 
         public void Dispose()
         {
-            _file.SaveManagerData(_managerFile);
+            _file.SaveManagingData(_managingFile);
             _file.Dispose();
             //_overfillFile.Dispose();
         }

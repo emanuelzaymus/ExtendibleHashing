@@ -60,14 +60,7 @@ namespace ExtendibleHashing
             _binFile.Save(block.ToByteArray(), block.InFileAddress);
         }
 
-        // TODO: write at onece
-        private void Save(DataBlock<T> block1, DataBlock<T> block2)
-        {
-            Save(block1);
-            Save(block2);
-        }
-
-        public DataBlock<T> GetNewBlock(int index)
+        public DataBlock<T> GetNewBlock(int atIndex)
         {
             int indexOfEmptyBlock = _blockOccupacity.IndexOf(false);
             _blockOccupacity[indexOfEmptyBlock] = true;
@@ -77,9 +70,9 @@ namespace ExtendibleHashing
                 _blockOccupacity.Add(false);
             }
             int newAddress = indexOfEmptyBlock * _blockByteSize;
-            BlockAddresses[index] = newAddress;
+            BlockAddresses[atIndex] = newAddress;
 
-            return new DataBlock<T>(index, newAddress, _blockBitDepths[index], _blockByteSize);
+            return new DataBlock<T>(atIndex, newAddress, _blockBitDepths[atIndex], _blockByteSize);
         }
 
         public void DoubleTheFileSize()
@@ -89,60 +82,79 @@ namespace ExtendibleHashing
             BitDepth++;
         }
 
-        // rozbi to na niekolo metod ! TODO
         public void Split(DataBlock<T> block)
         {
-            // Find first index of this
-            int firstIndexOfAddress = block.Index;
-            while (firstIndexOfAddress > 0 && BlockAddresses[firstIndexOfAddress - 1] == block.InFileAddress)
-            {
-                firstIndexOfAddress--;
-            }
+            // Find first index of this block addres
+            int firstIndexOfAddress = GetFirstIndexOfBlockAddress(block);
 
-            // Increment all blocks which has the same address
-            int increaseFrom = firstIndexOfAddress;
             int countOfBlocksHavingSameAddress = (int)Math.Pow(2, BitDepth - block.BitDepth);
-            int increaseToExcluding = increaseFrom + countOfBlocksHavingSameAddress;
-            for (int i = increaseFrom; i < increaseToExcluding; i++)
-            {
-                _blockBitDepths[i]++;
-            }
 
-            int updateNewAddressFrom = increaseFrom + (increaseToExcluding - increaseFrom) / 2;
-            int updateNewAddressToExcliding = increaseToExcluding;
+            // Increment all blocks which have the same address
+            IncrementBlockBitDepths(firstIndexOfAddress, countOfBlocksHavingSameAddress);
 
-            DataBlock<T> block1 = new DataBlock<T>(block.Index, block.InFileAddress, _blockBitDepths[block.Index], _blockByteSize);
-            DataBlock<T> block2 = GetNewBlock(updateNewAddressFrom);
+            int setNewAddressFromIndex = firstIndexOfAddress + countOfBlocksHavingSameAddress / 2;
+
+            DataBlock<T> oldBlock = new DataBlock<T>(block.Index, block.InFileAddress, _blockBitDepths[block.Index], _blockByteSize); // Empty copy of original block
+            DataBlock<T> newBlock = GetNewBlock(setNewAddressFromIndex); // Allocate new block
 
             // Update the second half of edited blocks with new block address
-            for (int i = updateNewAddressFrom; i < updateNewAddressToExcliding; i++)
+            SetBlockAdresses(setNewAddressFromIndex, countOfBlocksHavingSameAddress / 2, newBlock.InFileAddress);
+
+            DivideBlockIntoTwoBlocks(block, oldBlock, newBlock);
+
+
+            int GetFirstIndexOfBlockAddress(DataBlock<T> b)
             {
-                BlockAddresses[i] = block2.InFileAddress;
+                int frstIndexOfAddress = b.Index;
+                while (frstIndexOfAddress > 0 && BlockAddresses[frstIndexOfAddress - 1] == b.InFileAddress)
+                {
+                    frstIndexOfAddress--;
+                }
+                return frstIndexOfAddress;
             }
 
-            foreach (var item in block)
+            void IncrementBlockBitDepths(int indexFrom, int count)
             {
-                int ind = HashCodeToIndex(item.GetHashCode());
-                int address = BlockAddresses[ind];
-
-                if (address == block1.InFileAddress)
-                {
-                    block1.Add(item);
-                }
-                else if (address == block2.InFileAddress)
-                {
-                    block2.Add(item);
-                }
-                else throw new Exception("You should not get here");
+                for (int i = indexFrom; i < indexFrom + count; i++)
+                    _blockBitDepths[i]++;
             }
-            Save(block1, block2);
-            //Save(block1); // TODO: write at onece
-            //Save(block2);
+
+            void SetBlockAdresses(int indexFrom, int count, int newAddress)
+            {
+                for (int i = indexFrom; i < indexFrom + count; i++)
+                    BlockAddresses[i] = newAddress;
+            }
+
+            void DivideBlockIntoTwoBlocks(DataBlock<T> blockToDivide, DataBlock<T> block1, DataBlock<T> block2)
+            {
+                foreach (var item in blockToDivide)
+                {
+                    int ind = HashCodeToIndex(item.GetHashCode());
+                    int address = BlockAddresses[ind];
+
+                    if (address == block1.InFileAddress)
+                    {
+                        block1.Add(item);
+                    }
+                    else if (address == block2.InFileAddress)
+                    {
+                        block2.Add(item);
+                    }
+                    else throw new Exception("You should not get here");
+                }
+                Save(block1);
+                Save(block2);
+            }
         }
 
-        public void SaveManagerData(TextFileHandler managerFile)
+        public void TryMerge(DataBlock<T> block)
         {
-            managerFile.Write(_blockByteSize, BlockAddresses, _blockBitDepths, _blockOccupacity, BitDepth);
+            throw new NotImplementedException(); // TODO continue with deletion 
+        }
+
+        public void SaveManagingData(TextFileHandler managingFile)
+        {
+            managingFile.Write(_blockByteSize, BlockAddresses, _blockBitDepths, _blockOccupacity, BitDepth);
         }
 
         public void Dispose()
