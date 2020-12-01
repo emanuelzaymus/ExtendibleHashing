@@ -8,17 +8,18 @@ namespace ExtendibleHashing
 {
     public class ExtendibleHashingFile<T> : IDisposable, IEnumerable<T> where T : IData, new()
     {
-        private readonly FileStream _file;
-        private readonly FileStream _overfillFile;
+        private readonly DataBlockFile<T> _file;
+        //private readonly FileStream _overfillFile;
         private readonly TextFileHandler _managerFile;
-        private readonly int _blockByteSize;
 
-        private List<int> _blockAddresses = new List<int>() { 0, 0 }; // adresar
-        private List<int> _blockBitDepths = new List<int>() { 0, 0 }; // hlbky blokov
+        //private readonly int _blockByteSize;
 
-        private readonly List<bool> _fileBlockOccupacity = new List<bool>() { true, false }; // obsadenost blokov --> musi byt v Managery TODO !!!
+        //private List<int> _blockAddresses = new List<int>() { 0, 0 }; // adresar
+        //private List<int> _blockBitDepths = new List<int>() { 0, 0 }; // hlbky blokov
 
-        private int _fileBitDepth = 1; // hlbka suboru
+        //private readonly List<bool> _fileBlockOccupacity = new List<bool>() { true, false }; // obsadenost blokov --> musi byt v Managery TODO !!!
+
+        //private int _fileBitDepth = 1; // hlbka suboru
 
         /// <summary>
         /// </summary>
@@ -29,47 +30,58 @@ namespace ExtendibleHashing
         public ExtendibleHashingFile(string filePath, string overfillingFilePath, string managerFilePath,
             int blockByteSize = 4096, FileMode fileMode = FileMode.OpenOrCreate)
         {
-            _file = new FileStream(filePath, fileMode, FileAccess.ReadWrite, FileShare.ReadWrite, blockByteSize, FileOptions.WriteThrough);
-            _overfillFile = new FileStream(overfillingFilePath, fileMode, FileAccess.ReadWrite);
-            _blockByteSize = blockByteSize;
+            //_blockByteSize = blockByteSize;
 
             _managerFile = new TextFileHandler(managerFilePath);
-            if (fileMode != FileMode.Create &&
-                fileMode != FileMode.CreateNew &&
-                _managerFile.Read(out int bByteSize, out var bAddresses, out var bBitDepths, out var fBlockOccupacity, out int fBitDepth))
-            {
-                _blockByteSize = bByteSize;
-                _blockAddresses = bAddresses;
-                _blockBitDepths = bBitDepths;
-                _fileBlockOccupacity = fBlockOccupacity;
-                _fileBitDepth = fBitDepth;
-            }
 
-            if (_file.Length < _blockByteSize)
-            {
-                Save(new DataBlock<T>(0, 0, 1, _blockByteSize));
-            }
+            _file = new DataBlockFile<T>(filePath, fileMode, blockByteSize, _managerFile);
+
+            //if (fileMode != FileMode.Create &&
+            //    fileMode != FileMode.CreateNew &&
+            //    _managerFile.Read(out int bByteSize, out var bAddresses, out var bBitDepths, out var fBlockOccupacity, out int fBitDepth))
+            //{
+            //    _blockByteSize = bByteSize;
+            //    _blockAddresses = bAddresses;
+            //    _blockBitDepths = bBitDepths;
+            //    _fileBlockOccupacity = fBlockOccupacity;
+            //    _fileBitDepth = fBitDepth;
+
+            //    _file = new DataBlockFile<T>(filePath, fileMode, bByteSize, bAddresses, bBitDepths, fBlockOccupacity, fBitDepth);
+            //}
+            //else
+            //{
+            //    _file = new FileStream(filePath, fileMode, FileAccess.ReadWrite, FileShare.ReadWrite, _blockByteSize, FileOptions.WriteThrough);
+            //    _file = new DataBlockFile<T>(filePath, fileMode, _blockByteSize);
+            //}
+
+            //_overfillFile = new FileStream(overfillingFilePath, fileMode, FileAccess.ReadWrite);
+
+            //if (_file.Length < _blockByteSize)
+            //{
+            //    Save(new DataBlock<T>(0, 0, 1, _blockByteSize));
+            //}
         }
 
         public void Add(T item)
         {
             while (true)
             {
-                var block = GetDataBlock(item);
+                var block = _file.GetDataBlock(item);
 
                 if (block.IsFull)
                 {
-                    if (_fileBitDepth == block.BitDepth)
+                    if (_file.BitDepth == block.BitDepth)
                     {
-                        DoubleTheFileSize();
+                        _file.DoubleTheFileSize();
                         block.Index *= 2;
                     }
-                    Split(block);
+                    _file.Split(block);
                 }
                 else
                 {
                     block.Add(item);
-                    Save(block);
+                    //Save(block);
+                    _file.Save(block);
                     break;
                 }
             }
@@ -77,7 +89,7 @@ namespace ExtendibleHashing
 
         public T Find(T itemAddress)
         {
-            var block = GetDataBlock(itemAddress);
+            var block = _file.GetDataBlock(itemAddress);
             return block.Find(itemAddress);
         }
 
@@ -88,130 +100,134 @@ namespace ExtendibleHashing
 
         public void Dispose()
         {
+            _file.SaveManagerData(_managerFile);
+            //_managerFile.Write(_blockByteSize, _blockAddresses, _blockBitDepths, _fileBlockOccupacity, _fileBitDepth);
+
             _file.Dispose();
-            _overfillFile.Dispose();
-            _managerFile.Write(_blockByteSize, _blockAddresses, _blockBitDepths, _fileBlockOccupacity, _fileBitDepth);
+            //_overfillFile.Dispose();
         }
 
-        private DataBlock<T> GetDataBlock(T itemAddress)
-        {
-            int index = HashCodeToIndex(itemAddress.GetHashCode());
-            int address = _blockAddresses[index];
+        //private DataBlock<T> GetDataBlock(T itemAddress)
+        //{
+        //    int index = HashCodeToIndex(itemAddress.GetHashCode());
+        //    int address = _blockAddresses[index];
 
-            byte[] data = ReadBlock(address);
-            return new DataBlock<T>(index, address, _blockBitDepths[index], data);
-        }
+        //    byte[] data = ReadBlock(address);
+        //    return new DataBlock<T>(index, address, _blockBitDepths[index], data);
+        //}
 
-        private DataBlock<T> GetNewBlock(int index)
-        {
-            int indexOfEmptyBlock = _fileBlockOccupacity.IndexOf(false);
-            _fileBlockOccupacity[indexOfEmptyBlock] = true;
-            if (indexOfEmptyBlock + 1 == _fileBlockOccupacity.Count)
-            {
-                _fileBlockOccupacity.Add(false);
-            }
-            int newAddress = indexOfEmptyBlock * _blockByteSize;
-            _blockAddresses[index] = newAddress;
+        //private DataBlock<T> GetNewBlock(int index)
+        //{
+        //    int indexOfEmptyBlock = _fileBlockOccupacity.IndexOf(false);
+        //    _fileBlockOccupacity[indexOfEmptyBlock] = true;
+        //    if (indexOfEmptyBlock + 1 == _fileBlockOccupacity.Count)
+        //    {
+        //        _fileBlockOccupacity.Add(false);
+        //    }
+        //    int newAddress = indexOfEmptyBlock * _blockByteSize;
+        //    _blockAddresses[index] = newAddress;
 
-            return new DataBlock<T>(index, newAddress, _blockBitDepths[index], _blockByteSize);
-        }
+        //    return new DataBlock<T>(index, newAddress, _blockBitDepths[index], _blockByteSize);
+        //}
 
-        private byte[] ReadBlock(int address)
-        {
-            _file.Seek(address, SeekOrigin.Begin);
-            byte[] block = new byte[_blockByteSize];
-            _file.Read(block, 0, _blockByteSize);
-            return block;
-        }
+        //private byte[] ReadBlock(int address)
+        //{
+        //    _file.Seek(address, SeekOrigin.Begin);
+        //    byte[] block = new byte[_blockByteSize];
+        //    _file.Read(block, 0, _blockByteSize);
+        //    return block;
+        //}
 
-        private int HashCodeToIndex(int hashCode)
-        {
-            BitArray bits = HashCodeToBitArray(hashCode);
-            BitArray firstNBits = bits.FirstNLeastSignificantBits(_fileBitDepth);
-            BitArray reversed = firstNBits.ReverseBits();
-            return reversed.ToInt();
-        }
+        //private int HashCodeToIndex(int hashCode)
+        //{
+        //    BitArray bits = HashCodeToBitArray(hashCode);
+        //    BitArray firstNBits = bits.FirstNLeastSignificantBits(_fileBitDepth);
+        //    BitArray reversed = firstNBits.ReverseBits();
+        //    return reversed.ToInt();
+        //}
 
-        private BitArray HashCodeToBitArray(int hashCode)
-        {
-            return new BitArray(BitConverter.GetBytes(hashCode));
-        }
+        //private BitArray HashCodeToBitArray(int hashCode)
+        //{
+        //    return new BitArray(BitConverter.GetBytes(hashCode));
+        //}
 
-        private void DoubleTheFileSize()
-        {
-            _blockAddresses = _blockAddresses.DoubleValues();
-            _blockBitDepths = _blockBitDepths.DoubleValues();
-            _fileBitDepth++;
-        }
+        //private void DoubleTheFileSize()
+        //{
+        //    _blockAddresses = _blockAddresses.DoubleValues();
+        //    _blockBitDepths = _blockBitDepths.DoubleValues();
+        //    _fileBitDepth++;
+        //}
 
-        // rozbi to na niekolo metod ! TODO
-        private void Split(DataBlock<T> block)
-        {
-            // Find first index of this
-            int firstIndexOfAddress = block.Index;
-            while (firstIndexOfAddress > 0 && _blockAddresses[firstIndexOfAddress - 1] == block.InFileAddress)
-            {
-                firstIndexOfAddress--;
-            }
+        //// rozbi to na niekolo metod ! TODO
+        //private void Split(DataBlock<T> block)
+        //{
+        //    // Find first index of this
+        //    int firstIndexOfAddress = block.Index;
+        //    while (firstIndexOfAddress > 0 && _blockAddresses[firstIndexOfAddress - 1] == block.InFileAddress)
+        //    {
+        //        firstIndexOfAddress--;
+        //    }
 
-            // Increment all blocks which has the same address
-            int increaseFrom = firstIndexOfAddress;
-            int countOfBlocksHavingSameAddress = (int)Math.Pow(2, _fileBitDepth - block.BitDepth);
-            int increaseToExcluding = increaseFrom + countOfBlocksHavingSameAddress;
-            for (int i = increaseFrom; i < increaseToExcluding; i++)
-            {
-                _blockBitDepths[i]++;
-            }
+        //    // Increment all blocks which has the same address
+        //    int increaseFrom = firstIndexOfAddress;
+        //    int countOfBlocksHavingSameAddress = (int)Math.Pow(2, _fileBitDepth - block.BitDepth);
+        //    int increaseToExcluding = increaseFrom + countOfBlocksHavingSameAddress;
+        //    for (int i = increaseFrom; i < increaseToExcluding; i++)
+        //    {
+        //        _blockBitDepths[i]++;
+        //    }
 
-            int updateNewAddressFrom = increaseFrom + (increaseToExcluding - increaseFrom) / 2;
-            int updateNewAddressToExcliding = increaseToExcluding;
+        //    int updateNewAddressFrom = increaseFrom + (increaseToExcluding - increaseFrom) / 2;
+        //    int updateNewAddressToExcliding = increaseToExcluding;
 
-            DataBlock<T> block1 = new DataBlock<T>(block.Index, block.InFileAddress, _blockBitDepths[block.Index], _blockByteSize);
-            DataBlock<T> block2 = GetNewBlock(updateNewAddressFrom);
+        //    DataBlock<T> block1 = new DataBlock<T>(block.Index, block.InFileAddress, _blockBitDepths[block.Index], _blockByteSize);
+        //    DataBlock<T> block2 = _file.GetNewBlock(updateNewAddressFrom);
 
-            // Update the second half of edited blocks with new block address
-            for (int i = updateNewAddressFrom; i < updateNewAddressToExcliding; i++)
-            {
-                _blockAddresses[i] = block2.InFileAddress;
-            }
+        //    // Update the second half of edited blocks with new block address
+        //    for (int i = updateNewAddressFrom; i < updateNewAddressToExcliding; i++)
+        //    {
+        //        _blockAddresses[i] = block2.InFileAddress;
+        //    }
 
-            foreach (var item in block)
-            {
-                int ind = HashCodeToIndex(item.GetHashCode());
-                int address = _blockAddresses[ind];
+        //    foreach (var item in block)
+        //    {
+        //        int ind = HashCodeToIndex(item.GetHashCode());
+        //        int address = _blockAddresses[ind];
 
-                if (address == block1.InFileAddress)
-                {
-                    block1.Add(item);
-                }
-                else if (address == block2.InFileAddress)
-                {
-                    block2.Add(item);
-                }
-                else throw new Exception("You should not get here");
-            }
-            Save(block1); // TODO: write at onece
-            Save(block2);
-        }
+        //        if (address == block1.InFileAddress)
+        //        {
+        //            block1.Add(item);
+        //        }
+        //        else if (address == block2.InFileAddress)
+        //        {
+        //            block2.Add(item);
+        //        }
+        //        else throw new Exception("You should not get here");
+        //    }
+        //    _file.Save(block1, block2);
+        //    //Save(block1); // TODO: write at onece
+        //    //Save(block2);
+        //}
 
-        private void Save(DataBlock<T> block)
-        {
-            _file.Seek(block.InFileAddress, SeekOrigin.Begin);
-            _file.Write(block.ToByteArray(), 0, block.ByteSize);
-            _file.Flush(true);
-        }
+        //private void Save(DataBlock<T> block)
+        //{
+        //    _file.Seek(block.InFileAddress, SeekOrigin.Begin);
+        //    _file.Write(block.ToByteArray(), 0, block.ByteSize);
+        //    //_file.Flush(true);
+        //}
 
         public IEnumerator<T> GetEnumerator()
         {
             int lastAddr = -1;
-            foreach (var addr in _blockAddresses)
+            foreach (var addr in _file.BlockAddresses)
             {
                 if (addr != lastAddr)
                 {
                     lastAddr = addr;
 
-                    byte[] bytes = ReadBlock(addr);
-                    var block = new DataBlock<T>(bytes);
+                    var block = _file.GetDataBlock(addr);
+                    //byte[] bytes =  ReadBlock(addr);
+                    //var block = new DataBlock<T>(bytes);
                     foreach (var item in block)
                     {
                         yield return item;
