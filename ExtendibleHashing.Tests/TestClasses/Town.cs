@@ -35,7 +35,7 @@ namespace ExtendibleHashing.Tests.TestClasses
             _name.FromByteArray(byteArray, offset + _id.ByteSize);
         }
 
-        public bool AddressEquals(object obj)
+        public bool IdEquals(object obj)
         {
             return obj is Town town &&
                 Id == town.Id;

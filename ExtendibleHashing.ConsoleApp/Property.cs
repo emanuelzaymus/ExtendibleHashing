@@ -54,7 +54,7 @@ namespace ExtendibleHashing.ConsoleApp
             _description.FromByteArray(byteArray, offset + _id.ByteSize + _number.ByteSize);
         }
 
-        public bool AddressEquals(object obj)
+        public bool IdEquals(object obj)
         {
             return obj is Property property &&
                 Id == property.Id;

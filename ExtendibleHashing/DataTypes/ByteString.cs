@@ -50,7 +50,7 @@ namespace ExtendibleHashing.DataTypes
             String = Encoding.Unicode.GetString(byteArray, offset + sizeof(int), actualStringLength * ByteSizeOfCharacter);
         }
 
-        public bool AddressEquals(object obj)
+        public bool IdEquals(object obj)
         {
             return obj is ByteString byteString &&
                    String == byteString.String;

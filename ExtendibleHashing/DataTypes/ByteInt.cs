@@ -22,7 +22,7 @@ namespace ExtendibleHashing.DataTypes
             Int = BitConverter.ToInt32(byteArray, offset);
         }
 
-        public bool AddressEquals(object obj)
+        public bool IdEquals(object obj)
         {
             return obj is ByteInt byteInt &&
                    Int == byteInt.Int;

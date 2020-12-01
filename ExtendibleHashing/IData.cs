@@ -2,6 +2,6 @@
 {
     public interface IData : IBinarySerializable
     {
-        bool AddressEquals(object obj);
+        bool IdEquals(object obj);
     }
 }   

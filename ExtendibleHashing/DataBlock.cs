@@ -48,7 +48,7 @@ namespace ExtendibleHashing
         {
             foreach (var item in _items)
             {
-                if (item.AddressEquals(itemAddress))
+                if (item.IdEquals(itemAddress))
                     return item;
             }
             return default;
