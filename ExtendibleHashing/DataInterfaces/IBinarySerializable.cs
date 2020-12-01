@@ -1,4 +1,4 @@
-﻿namespace ExtendibleHashing
+﻿namespace ExtendibleHashing.DataInterfaces
 {
     public interface IBinarySerializable
     {

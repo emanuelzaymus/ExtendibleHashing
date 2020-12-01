@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ExtendibleHashing.DataInterfaces;
+using System;
 
 namespace ExtendibleHashing.DataTypes
 {

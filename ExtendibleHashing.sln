@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ExtendibleHashing", "Extend
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ExtendibleHashing.ConsoleApp", "ExtendibleHashing.ConsoleApp\ExtendibleHashing.ConsoleApp.csproj", "{C984DDEA-CFD3-4F14-BBD1-D961F1C353E6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExtendibleHashing.Tests", "ExtendibleHashing.Tests\ExtendibleHashing.Tests.csproj", "{2D93D243-0615-4AA1-989B-5C90BF4FFB63}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ExtendibleHashing.Tests", "ExtendibleHashing.Tests\ExtendibleHashing.Tests.csproj", "{2D93D243-0615-4AA1-989B-5C90BF4FFB63}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

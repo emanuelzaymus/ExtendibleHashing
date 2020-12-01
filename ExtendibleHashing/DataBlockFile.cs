@@ -1,6 +1,8 @@
-﻿using ExtendibleHashing.Extensions;
+﻿using ExtendibleHashing.DataInterfaces;
+using ExtendibleHashing.Extensions;
+using ExtendibleHashing.FileHandlers;
+using ExtendibleHashing.Hashing;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 
@@ -8,7 +10,8 @@ namespace ExtendibleHashing
 {
     class DataBlockFile<T> : IDisposable where T : IData, new()
     {
-        private BinaryFileHandler _binFile;
+        private readonly IHashing _hashing;
+        private readonly BinaryFileHandler _binFile;
         private readonly int _blockByteSize;
 
         public List<int> BlockAddresses { get; private set; } = new List<int>() { 0, 0 }; // adresar
@@ -18,13 +21,7 @@ namespace ExtendibleHashing
 
         public int BitDepth { get; private set; } = 1; // hlbka suboru
 
-        //public DataBlockFile(string filePath, FileMode fileMode, int blockByteSize)
-        //{
-        //    _binFile = new BinaryFileHandler(filePath, fileMode, blockByteSize);
-        //    _blockByteSize = blockByteSize;
-        //}
-
-        public DataBlockFile(string filePath, FileMode fileMode, int blockByteSize, TextFileHandler managerFile)
+        public DataBlockFile(string filePath, FileMode fileMode, int blockByteSize, TextFileHandler managerFile, IHashing hashing)
         {
             _blockByteSize = blockByteSize;
 
@@ -40,17 +37,8 @@ namespace ExtendibleHashing
             }
 
             _binFile = new BinaryFileHandler(filePath, fileMode, _blockByteSize);
+            _hashing = hashing;
         }
-
-        //public DataBlockFile(string filePath, FileMode fileMode, int blockByteSize,
-        //    List<int> blockAddresses, List<int> blockBitDepths, List<bool> fileBlockOccupacity, int fileBitDepth)
-        //    : this(filePath, fileMode, blockByteSize)
-        //{
-        //    _blockAddresses = blockAddresses;
-        //    _blockBitDepths = blockBitDepths;
-        //    _fileBlockOccupacity = fileBlockOccupacity;
-        //    _fileBitDepth = fileBitDepth;
-        //}
 
         public DataBlock<T> GetDataBlock(T itemId)
         {
@@ -167,18 +155,9 @@ namespace ExtendibleHashing
             return _binFile.ReadBlock(address);
         }
 
-        // TODO Duplicity !!! - class Hashing
         private int HashCodeToIndex(int hashCode)
         {
-            BitArray bits = HashCodeToBitArray(hashCode);
-            BitArray firstNBits = bits.FirstNLeastSignificantBits(BitDepth);
-            BitArray reversed = firstNBits.ReverseBits();
-            return reversed.ToInt();
-        }
-
-        private BitArray HashCodeToBitArray(int hashCode)
-        {
-            return new BitArray(BitConverter.GetBytes(hashCode));
+            return _hashing.HashCodeToIndex(hashCode, BitDepth);
         }
 
     }

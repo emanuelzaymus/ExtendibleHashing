@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 
-namespace ExtendibleHashing
+namespace ExtendibleHashing.FileHandlers
 {
     class BinaryFileHandler : IDisposable
     {

@@ -1,4 +1,5 @@
-﻿using ExtendibleHashing.DataTypes;
+﻿using ExtendibleHashing.DataInterfaces;
+using ExtendibleHashing.DataTypes;
 using System;
 using System.Linq;
 

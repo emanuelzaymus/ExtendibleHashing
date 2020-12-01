@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-namespace ExtendibleHashing
+namespace ExtendibleHashing.FileHandlers
 {
     class TextFileHandler
     {
