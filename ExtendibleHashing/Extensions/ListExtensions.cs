@@ -14,5 +14,16 @@ namespace ExtendibleHashing.Extensions
             }
             return ret;
         }
+
+        public static List<T> RemoveEveryOtherValue<T>(this List<T> list)
+        {
+            var ret = new List<T>(list.Count / 2);
+            for (int i = 0; i < list.Count; i++)
+            {
+                if (i % 2 == 0)
+                    ret.Add(list[i]);
+            }
+            return ret;
+        }
     }
 }

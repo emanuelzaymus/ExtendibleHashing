@@ -62,7 +62,11 @@ namespace ExtendibleHashing
             var block = _file.GetDataBlock(itemId);
             if (block.Remove(itemId))
             {
-                _file.TryMerge(block);
+                bool mergedAndSaved = _file.TryMergeAndSave(block);
+                if (!mergedAndSaved)
+                {
+                    _file.Save(block);
+                }
                 return true;
             }
             return false;

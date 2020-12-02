@@ -1,6 +1,5 @@
 ﻿using ExtendibleHashing.DataInterfaces;
 using System;
-using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -15,9 +14,14 @@ namespace ExtendibleHashing
         private readonly int _maxItemCount;
         private readonly List<T> _items = new List<T>();
 
+        public int MaxItemCount => _maxItemCount;
+
         public int Index { get; set; }
-        public int InFileAddress { get; }
-        public int BitDepth { get; }
+        public int InFileAddress { get; set; }
+        public int BitDepth { get; set; }
+
+        public int ItemCount => _items.Count;
+        public bool IsFull => _items.Count >= _maxItemCount;
 
         public DataBlock(int index, int inFileAddress, int bitDepth, int blockByteSize)
         {
@@ -37,13 +41,20 @@ namespace ExtendibleHashing
             FromByteArray(data, 0);
         }
 
+        /// <summary>
+        /// Creates DataBlock with <paramref name="data"/> and with invalid properties.
+        /// </summary>
+        /// <param name="data"></param>
         public DataBlock(byte[] data) : this(-1, -1, -1, data) { }
-
-        public bool IsFull => _items.Count >= _maxItemCount;
 
         public void Add(T item)
         {
-            _items.Add(item);
+            if (!IsFull)
+            {
+                _items.Add(item);
+                return;
+            }
+            throw new Exception("DataBlock is full, you cannot add more items.");
         }
 
         public T Find(T itemId)

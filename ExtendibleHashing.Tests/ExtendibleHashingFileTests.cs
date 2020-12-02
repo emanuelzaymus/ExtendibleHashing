@@ -171,5 +171,207 @@ namespace ExtendibleHashing.Tests
             }
         }
 
+        [TestMethod]
+        public void Remove_OneTown_SholudRemoveWithouotMerging()
+        {
+            using (var f = GetExtendibleHashingFileFilled())
+            {
+                Assert.IsTrue(f.Remove(new TownId(0b_1000_0000))); // "Poprad"
+                Assert.IsNull(f.Find(new TownId(0b_1000_0000)));
+
+                var expected = new[] {
+                    "Žilina", "Ilava", "Brezno",
+                    "Košice", "Lučenec", "Nitra",
+                    "Martin",
+                    "Levice", "Trnava", "Snina", "Senica", "Púchov",
+                    "Zvolen", "Prešov"
+                };
+                var actual = f.Select(t => t.Name).ToArray();
+                CollectionAssert.AreEqual(expected, actual);
+            }
+        }
+
+        [TestMethod]
+        public void Remove_TownFromLeftBlockWithBithDepth3_SholudRemoveWithMergingOneRightBlock()
+        {
+            using (var f = GetExtendibleHashingFileFilled())
+            {
+                Assert.IsTrue(f.Remove(new TownId(169))); // "Martin"
+                Assert.IsNull(f.Find(new TownId(169)));
+
+                var expected = new[] {
+                    "Žilina", "Poprad", "Ilava", "Brezno",
+                    "Košice", "Lučenec", "Nitra",
+                    "Levice", "Trnava", "Snina", "Senica", "Púchov",
+                    "Zvolen", "Prešov"
+                };
+                var actual = f.Select(t => t.Name).ToArray();
+                CollectionAssert.AreEqual(expected, actual);
+            }
+        }
+
+        [TestMethod]
+        public void Remove_TownFromRightBlockWithBithDepth3_SholudRemoveWithMergingOneLeftBlock()
+        {
+            using (var f = GetExtendibleHashingFileFilled())
+            {
+                Assert.IsTrue(f.Remove(new TownId(0b_0110_1101))); // "Snina"
+                Assert.IsNull(f.Find(new TownId(0b_0110_1101)));
+
+                var expected = new[] {
+                    "Žilina", "Poprad", "Ilava", "Brezno",
+                    "Košice", "Lučenec", "Nitra",
+                    "Martin", "Levice", "Trnava", "Senica", "Púchov",
+                    "Zvolen", "Prešov"
+                };
+                var actual = f.Select(t => t.Name).ToArray();
+                CollectionAssert.AreEqual(expected, actual);
+            }
+        }
+
+        [TestMethod]
+        public void Remove_TownFromLeftBlockWithBithDepth2_SholudRemoveWithMergingTwoRightBlocks()
+        {
+            using (var f = GetExtendibleHashingFileFilled())
+            {
+                FileStream file = new FileStream(FilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+                long fileLength = file.Length;
+
+                Assert.IsTrue(f.Remove(new TownId(0b_1000_0000))); // "Poprad"
+                Assert.IsNull(f.Find(new TownId(0b_1000_0000)));
+                Assert.AreEqual(fileLength, file.Length);
+
+                Assert.IsTrue(f.Remove(new TownId(0b_1111_0000))); // "Ilava"
+                Assert.IsNull(f.Find(new TownId(0b_1111_0000)));
+                Assert.AreEqual(fileLength - BlockByteSize, file.Length);
+
+                var expected = new[] {
+                    "Žilina", "Brezno", "Košice", "Lučenec", "Nitra",
+                    "Martin",
+                    "Levice", "Trnava", "Snina", "Senica", "Púchov",
+                    "Zvolen", "Prešov"
+                };
+                var actual = f.Select(t => t.Name).ToArray();
+                CollectionAssert.AreEqual(expected, actual);
+            }
+        }
+
+        [TestMethod]
+        public void Remove_TownFromRightBlockWithBithDepth2_SholudRemoveWithMergingTwoLefttBlocks()
+        {
+            using (var f = GetExtendibleHashingFileFilled())
+            {
+                FileStream file = new FileStream(FilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+                long fileLength = file.Length;
+
+                Assert.IsTrue(f.Remove(new TownId(38))); // "Košice"
+                Assert.IsNull(f.Find(new TownId(38)));
+                Assert.AreEqual(fileLength, file.Length);
+
+                Assert.IsTrue(f.Remove(new TownId(0b_0011_0110))); // "Nitra"
+                Assert.IsNull(f.Find(new TownId(0b_0011_0110)));
+                Assert.AreEqual(fileLength - BlockByteSize, file.Length);
+
+                var expected = new[] {
+                    "Žilina", "Poprad", "Ilava", "Brezno", "Lučenec",
+                    "Martin",
+                    "Levice", "Trnava", "Snina", "Senica", "Púchov",
+                    "Zvolen", "Prešov"
+                };
+                var actual = f.Select(t => t.Name).ToArray();
+                CollectionAssert.AreEqual(expected, actual);
+            }
+        }
+
+        [TestMethod]
+        public void Remove_AllItemsFromBlockNotHavingNeighbour_SholudRemoveWithoutMergingAndLeaveItEmpty()
+        {
+            using (var f = GetExtendibleHashingFileFilled())
+            {
+                Assert.IsTrue(f.Remove(new TownId(0b_1001_0111))); // "Zvolen"
+                Assert.IsNull(f.Find(new TownId(0b_1001_0111)));
+
+                Assert.IsTrue(f.Remove(new TownId(0b_0000_1111))); // "Prešov"
+                Assert.IsNull(f.Find(new TownId(0b_0000_1111)));
+
+                var expected = new[] {
+                    "Žilina", "Poprad", "Ilava", "Brezno",
+                    "Košice", "Lučenec", "Nitra",
+                    "Martin",
+                    "Levice", "Trnava", "Snina", "Senica", "Púchov"
+                };
+                var actual = f.Select(t => t.Name).ToArray();
+                CollectionAssert.AreEqual(expected, actual);
+            }
+        }
+
+        [TestMethod]
+        public void Remove_Items_SholudRemoveWithoutMergingAndLeaveItEmpty()
+        {
+            using (var f = GetExtendibleHashingFileFilled())
+            {
+                FileStream file = new FileStream(FilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+                long fileLength = file.Length;
+
+                Assert.IsTrue(f.Remove(new TownId(0))); // "Žilina"
+                Assert.IsTrue(f.Remove(new TownId(0b_1000_0000))); // "Poprad"
+
+                Assert.IsTrue(f.Remove(new TownId(0b_1001_0111))); // "Zvolen"
+                Assert.IsTrue(f.Remove(new TownId(0b_0000_1111))); // "Prešov"
+
+                Assert.IsTrue(f.Remove(new TownId(221))); // "Levice"
+                Assert.AreEqual(BlockByteSize * 2, file.Length);
+
+                var expected = new[] {
+                    "Ilava", "Brezno", "Košice", "Lučenec", "Nitra",
+                    "Martin", "Trnava", "Snina", "Senica", "Púchov"
+                };
+                var actual = f.Select(t => t.Name).ToArray();
+                CollectionAssert.AreEqual(expected, actual);
+            }
+        }
+
+        [TestMethod]
+        public void Remove_AllItems_SholudRemoveAllItems()
+        {
+            using (var f = GetExtendibleHashingFileFilled())
+            {
+                Assert.IsTrue(f.Remove(new TownId(0)));
+                Assert.IsTrue(f.Remove(new TownId(38)));
+                Assert.IsTrue(f.Remove(new TownId(169)));
+                Assert.IsTrue(f.Remove(new TownId(221)));
+                Assert.IsTrue(f.Remove(new TownId(0b_1010_0101)));
+                Assert.IsTrue(f.Remove(new TownId(0b_0110_1101)));
+                Assert.IsTrue(f.Remove(new TownId(0b_0000_0101)));
+                Assert.IsTrue(f.Remove(new TownId(0b_1000_0000)));
+                Assert.IsTrue(f.Remove(new TownId(0b_1010_0110)));
+                Assert.IsTrue(f.Remove(new TownId(0b_0011_0110)));
+                Assert.IsTrue(f.Remove(new TownId(0b_1001_0111)));
+                Assert.IsTrue(f.Remove(new TownId(0b_0000_1111)));
+                Assert.IsTrue(f.Remove(new TownId(0b_1110_1101)));
+                Assert.IsTrue(f.Remove(new TownId(0b_1111_0000)));
+                Assert.IsTrue(f.Remove(new TownId(0b_0011_1100)));
+
+                Assert.IsNull(f.Find(new TownId(0)));
+                Assert.IsNull(f.Find(new TownId(38)));
+                Assert.IsNull(f.Find(new TownId(169)));
+                Assert.IsNull(f.Find(new TownId(221)));
+                Assert.IsNull(f.Find(new TownId(0b_1010_0101)));
+                Assert.IsNull(f.Find(new TownId(0b_0110_1101)));
+                Assert.IsNull(f.Find(new TownId(0b_0000_0101)));
+                Assert.IsNull(f.Find(new TownId(0b_1000_0000)));
+                Assert.IsNull(f.Find(new TownId(0b_1010_0110)));
+                Assert.IsNull(f.Find(new TownId(0b_0011_0110)));
+                Assert.IsNull(f.Find(new TownId(0b_1001_0111)));
+                Assert.IsNull(f.Find(new TownId(0b_0000_1111)));
+                Assert.IsNull(f.Find(new TownId(0b_1110_1101)));
+                Assert.IsNull(f.Find(new TownId(0b_1111_0000)));
+                Assert.IsNull(f.Find(new TownId(0b_0011_1100)));
+
+                var actual = f.Select(t => t.Name).ToArray();
+                CollectionAssert.AreEqual(new string[0], actual);
+            }
+        }
+
     }
 }

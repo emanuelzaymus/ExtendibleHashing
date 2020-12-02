@@ -100,7 +100,7 @@ namespace ExtendibleHashing.Tests
                             }
                             break;
                         default:
-                            break;
+                            break; // TODO: fuzzy remove
                     }
                 }
             }
