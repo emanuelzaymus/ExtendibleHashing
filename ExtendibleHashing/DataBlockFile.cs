@@ -31,14 +31,16 @@ namespace ExtendibleHashing
                 else throw new ArgumentException($"{nameof(BitDepth)} can not be less than 1.");
             }
         }
+        public int MaxBitDepth { get; }
 
-        public DataBlockFile(string filePath, FileMode fileMode, int blockByteSize, TextFileHandler managerFile, IHashing hashing)
+        public DataBlockFile(string filePath, FileMode fileMode, int blockByteSize, ManagingFileHandler managerFile, IHashing hashing, int maxBitDepth)
         {
             _blockByteSize = blockByteSize;
+            MaxBitDepth = maxBitDepth;
 
             if (fileMode != FileMode.Create &&
                 fileMode != FileMode.CreateNew &&
-                managerFile.Read(out int bByteSize, out var bAddresses, out var bBitDepths, out var bItemCounts, out var bOccupation, out int bitDepth))
+                managerFile.Read(out int bByteSize, out var bAddresses, out var bBitDepths, out var bItemCounts, out var bOccupation, out int bitDepth, out int mBitDepth))
             {
                 _blockByteSize = bByteSize;
                 BlockAddresses = bAddresses;
@@ -46,6 +48,7 @@ namespace ExtendibleHashing
                 _blockItemCounts = bItemCounts;
                 _blockOccupation = bOccupation;
                 BitDepth = bitDepth;
+                MaxBitDepth = mBitDepth;
             }
 
             _binFile = new BinaryFileHandler(filePath, fileMode, _blockByteSize);
@@ -340,9 +343,9 @@ namespace ExtendibleHashing
             return (index1 & mask) == (index2 & mask);
         }
 
-        public void SaveManagingData(TextFileHandler managingFile)
+        public void SaveManagingData(ManagingFileHandler managingFile)
         {
-            managingFile.Write(_blockByteSize, BlockAddresses, _blockBitDepths, _blockItemCounts, _blockOccupation, BitDepth);
+            managingFile.Write(_blockByteSize, BlockAddresses, _blockBitDepths, _blockItemCounts, _blockOccupation, BitDepth, MaxBitDepth);
         }
 
         public void Dispose()

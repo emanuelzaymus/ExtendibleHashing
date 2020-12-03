@@ -32,8 +32,8 @@ namespace ExtendibleHashing.Extensions
 
         public static int ToInt(this BitArray bitArray)
         {
-            if (bitArray.Length > 32)
-                throw new ArgumentException($"Length of '{nameof(bitArray)}' is more than 32.");
+            if (bitArray.Length > sizeof(int) * 8)
+                throw new ArgumentException($"Length of '{nameof(bitArray)}' is more than {sizeof(int) * 8}.");
 
             int[] array = new int[1];
             bitArray.CopyTo(array, 0);

@@ -52,9 +52,8 @@ namespace ExtendibleHashing
             if (!IsFull)
             {
                 _items.Add(item);
-                return;
             }
-            throw new Exception("DataBlock is full, you cannot add more items.");
+            else throw new Exception("DataBlock is full, you cannot add more items.");
         }
 
         public T Find(T itemId)

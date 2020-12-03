@@ -10,9 +10,10 @@ namespace ExtendibleHashing
 {
     public class ExtendibleHashingFile<T> : IDisposable, IEnumerable<T> where T : IData, new()
     {
-        private readonly TextFileHandler _managingFile;
+        private readonly ManagingFileHandler _managingFile;
+        private readonly OverfillingManagingFileHandler _overfillingManagingFile;
         private readonly DataBlockFile<T> _file;
-        //private readonly FileStream _overfillFile;
+        private readonly OverfillingBlockFile<T> _overfillFile;
 
         /// <summary>
         /// </summary>
@@ -20,11 +21,13 @@ namespace ExtendibleHashing
         /// <param name="overfillingFilePath"></param>
         /// <param name="managerFilePath"></param>
         /// <param name="blockByteSize">Block size in bytes</param>
-        public ExtendibleHashingFile(string filePath, string overfillingFilePath, string managerFilePath,
-            int blockByteSize = 4096, FileMode fileMode = FileMode.OpenOrCreate)
+        public ExtendibleHashingFile(string filePath, string overfillingFilePath, string managerFilePath, string overfillingManagerFilePath,
+            int blockByteSize = 4096, int overfillingBlockByteSize = 4096, FileMode fileMode = FileMode.OpenOrCreate, int maxBitDepth = 32)
         {
-            _managingFile = new TextFileHandler(managerFilePath);
-            _file = new DataBlockFile<T>(filePath, fileMode, blockByteSize, _managingFile, new BitHashing());
+            _managingFile = new ManagingFileHandler(managerFilePath);
+            _overfillingManagingFile = new OverfillingManagingFileHandler(overfillingManagerFilePath);
+            _file = new DataBlockFile<T>(filePath, fileMode, blockByteSize, _managingFile, new BitHashing(), maxBitDepth);
+            _overfillFile = new OverfillingBlockFile<T>(overfillingFilePath, fileMode, overfillingBlockByteSize, _overfillingManagingFile);
         }
 
         public void Add(T item)
@@ -33,14 +36,26 @@ namespace ExtendibleHashing
             {
                 var block = _file.GetDataBlock(item);
 
-                if (block.IsFull)
+                if (block.IsFull) // TODO: I should be able to know this without readinf it from the file.
                 {
                     if (_file.BitDepth == block.BitDepth)
                     {
-                        _file.DoubleTheFileSize();
-                        block.Index *= 2;
+                        if (_file.BitDepth < _file.MaxBitDepth)
+                        {
+                            _file.DoubleTheFileSize();
+                            block.Index *= 2;
+                            _file.Split(block);
+                        }
+                        else
+                        {
+                            _overfillFile.Add(block.InFileAddress, item);
+                            break;
+                        }
                     }
-                    _file.Split(block);
+                    else
+                    {
+                        _file.Split(block);
+                    }
                 }
                 else
                 {
@@ -54,7 +69,12 @@ namespace ExtendibleHashing
         public T Find(T itemId)
         {
             var block = _file.GetDataBlock(itemId);
-            return block.Find(itemId);
+            T foundItem = block.Find(itemId);
+            if (foundItem == null)
+            {
+                foundItem = _overfillFile.Find(block.InFileAddress, itemId);
+            }
+            return foundItem;
         }
 
         public bool Remove(T itemId)
@@ -76,7 +96,7 @@ namespace ExtendibleHashing
         {
             if (oldItem.IdEquals(newItem))
             {
-                throw new ArgumentException($"Parameters {nameof(oldItem)} and {nameof(newItem)} does not equal in ID attributes.");
+                throw new ArgumentException($"Parameters {nameof(oldItem)} and {nameof(newItem)} do not equal in ID attributes.");
             }
             throw new NotImplementedException();
         }
@@ -85,7 +105,8 @@ namespace ExtendibleHashing
         {
             _file.SaveManagingData(_managingFile);
             _file.Dispose();
-            //_overfillFile.Dispose();
+            _overfillFile.SaveManagingData(_overfillingManagingFile);
+            _overfillFile.Dispose();
         }
 
         public IEnumerator<T> GetEnumerator()
@@ -99,11 +120,11 @@ namespace ExtendibleHashing
 
                     var block = _file.GetDataBlock(addr);
                     foreach (var item in block)
-                    {
                         yield return item;
-                    }
                 }
             }
+            foreach (var item in _overfillFile)
+                yield return item;
         }
 
         IEnumerator IEnumerable.GetEnumerator()
