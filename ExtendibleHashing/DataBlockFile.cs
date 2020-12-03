@@ -245,12 +245,12 @@ namespace ExtendibleHashing
             FreeUpBlockAddress(blockWithHigherAddress.InFileAddress);
             ReduceFileSizeIfPossible();
             // Replace all blockWithHigherAddress items to blockWithLowerAddress properties.
-            SetBlockAddresses(blockWithHigherAddress.InFileAddress, blockWithLowerAddress.InFileAddress);
+            SetBlockAddresses(blockWithHigherAddress, blockWithLowerAddress.InFileAddress);
             blockWithHigherAddress.InFileAddress = blockWithLowerAddress.InFileAddress;
             // Decrement all bit depths where is new address.
-            DecrementBitDepths(blockWithHigherAddress.InFileAddress);
             blockWithLowerAddress.BitDepth--;
             blockWithHigherAddress.BitDepth--;
+            DecrementBitDepths(blockWithHigherAddress);
             // Update block item counts for 
             UpdateBlockItemCounts(blockWithLowerAddress);
 
@@ -262,21 +262,23 @@ namespace ExtendibleHashing
             _binFile.ReduceSizeIfPossible((_blockOccupation.LastIndexOf(true) + 1) * _blockByteSize);
         }
 
-        private void DecrementBitDepths(int whereAddress)
+        private void DecrementBitDepths(DataBlock<T> block)
         {
-            for (int i = 0; i < BlockAddresses.Count; i++)
+            int first = GetFirstIndexOfBlockAddress(block);
+            int lastExclude = first + GetCountOfBlocksHavingSameAddress(block);
+            for (int i = first; i < lastExclude; i++)
             {
-                if (BlockAddresses[i] == whereAddress)
-                    _blockBitDepths[i]--;
+                _blockBitDepths[i]--;
             }
         }
 
-        private void SetBlockAddresses(int oldAddress, int newAddress)
+        private void SetBlockAddresses(DataBlock<T> oldBlock, int newAddress)
         {
-            for (int i = 0; i < BlockAddresses.Count; i++)
+            int first = GetFirstIndexOfBlockAddress(oldBlock);
+            int lastExclude = first + GetCountOfBlocksHavingSameAddress(oldBlock);
+            for (int i = first; i < lastExclude; i++)
             {
-                if (BlockAddresses[i] == oldAddress)
-                    BlockAddresses[i] = newAddress;
+                BlockAddresses[i] = newAddress;
             }
         }
 
