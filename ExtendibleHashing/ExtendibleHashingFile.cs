@@ -79,6 +79,7 @@ namespace ExtendibleHashing
 
         public bool Remove(T itemId)
         {
+            bool wasRemoved;
             var block = _file.GetDataBlock(itemId);
             if (block.Remove(itemId))
             {
@@ -87,9 +88,14 @@ namespace ExtendibleHashing
                 {
                     _file.Save(block);
                 }
-                return true;
+                wasRemoved = true;
             }
-            return false;
+            else wasRemoved = _overfillFile.Remove(block.InFileAddress, itemId);
+            if (wasRemoved)
+            {
+                //todo: shring overfillFile is possible
+            }
+            return wasRemoved;
         }
 
         public bool Update(T oldItem, T newItem)

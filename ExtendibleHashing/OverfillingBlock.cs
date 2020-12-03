@@ -1,8 +1,4 @@
 ﻿using ExtendibleHashing.DataInterfaces;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Text;
 
 namespace ExtendibleHashing
 {
@@ -26,5 +22,30 @@ namespace ExtendibleHashing
             _items.Add(item);
             Info.ItemCount++;
         }
+
+        internal T Find(T itemId)
+        {
+            foreach (var item in _items)
+            {
+                if (item.IdEquals(itemId))
+                    return item;
+            }
+            return default;
+        }
+
+        internal bool Remove(T itemId)
+        {
+            for (int i = 0; i < _items.Count; i++)
+            {
+                if (_items[i].IdEquals(itemId))
+                {
+                    _items.RemoveAt(i);
+                    Info.ItemCount--;
+                    return true;
+                }
+            }
+            return false;
+        }
+
     }
 }

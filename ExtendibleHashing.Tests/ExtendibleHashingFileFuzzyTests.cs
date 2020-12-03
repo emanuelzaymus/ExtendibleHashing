@@ -19,6 +19,16 @@ namespace ExtendibleHashing.Tests
             return file;
         }
 
+        private ExtendibleHashingFile<Town> GetExtendibleHashingFileWith3BitDepth(IEnumerable<Town> towns)
+        {
+            var file = ExtendibleHashingFileTests.GetExtendibleHashingFileWith3BitDepth();
+            foreach (var t in towns)
+            {
+                file.Add(t);
+            }
+            return file;
+        }
+
         [TestMethod]
         [Timeout(15000)]
         public void FuzzyAdd()
@@ -70,6 +80,55 @@ namespace ExtendibleHashing.Tests
             var checkList = new LinkedList<Town>(RandomTownGenerator.GenerateTowns(count));
             int i = 0;
             using (var f = GetExtendibleHashingFile(checkList))
+            {
+                while (checkList.Count > 0)
+                {
+                    Town t = checkList.Last();
+                    Assert.IsTrue(f.Remove(new TownId(t.Id)));
+                    Assert.IsNull(f.Find(new TownId(t.Id)));
+                    checkList.RemoveLast();
+                    if (i++ % 100 == 0)
+                        CollectionAssert.AreEquivalent(checkList, f.ToList());
+                }
+            }
+        }
+
+        [TestMethod]
+        [Timeout(15000)]
+        public void FuzzyAdd_With3DithDepth_ShoudAddToOverfillingFile()
+        {
+            int count = 5000;
+            var checkList = RandomTownGenerator.GenerateTowns(count).ToList();
+            using (var f = GetExtendibleHashingFileWith3BitDepth(checkList))
+            {
+                CollectionAssert.AreEquivalent(checkList, f.ToList());
+            }
+        }
+
+        [TestMethod]
+        [Timeout(20000)]
+        public void FuzzyFind_With3DithDepth_ShoudFindInOverfillingFile()
+        {
+            int count = 8000;
+            var checkList = RandomTownGenerator.GenerateTowns(count).ToList();
+            using (var f = GetExtendibleHashingFileWith3BitDepth(checkList))
+            {
+                foreach (var t in checkList)
+                {
+                    var found = f.Find(new TownId(t.Id));
+                    Assert.AreEqual(t, found);
+                }
+            }
+        }
+
+        [TestMethod]
+        [Timeout(20000)]
+        public void FuzzyRemove_With3DithDepth_ShoudRemovefromOverfillingFile()
+        {
+            int count = 5000;
+            var checkList = new LinkedList<Town>(RandomTownGenerator.GenerateTowns(count));
+            int i = 0;
+            using (var f = GetExtendibleHashingFileWith3BitDepth(checkList))
             {
                 while (checkList.Count > 0)
                 {

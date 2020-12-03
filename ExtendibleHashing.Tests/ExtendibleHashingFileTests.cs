@@ -476,5 +476,34 @@ namespace ExtendibleHashing.Tests
             }
         }
 
+        [TestMethod]
+        public void Remove_ItemsFromOverfillingBlock_SholudRemoveFromOverfillingBlock()
+        {
+            using (var f = GetExtendibleHashingFileWith3BitDepthFilled())
+            {
+                f.Add(new Town(0b_1111_0101, "Mesto 1"));
+                f.Add(new Town(0b_0111_0101, "Mesto 2"));
+                f.Add(new Town(0b_1011_0101, "Mesto 3"));
+                f.Add(new Town(0b_0011_0101, "Mesto 4"));
+                f.Add(new Town(0b_1001_0101, "Mesto 5"));
+
+                f.Add(new Town(0b_1101_0101, "Mesto 6"));
+                Assert.IsTrue(f.Remove(new TownId(0b_1101_0101)));
+
+                Assert.IsTrue(f.Remove(new TownId(0b_1111_0101)));
+                Assert.IsTrue(f.Remove(new TownId(0b_0111_0101)));
+                Assert.IsTrue(f.Remove(new TownId(0b_1011_0101)));
+                Assert.IsTrue(f.Remove(new TownId(0b_0011_0101)));
+                Assert.IsTrue(f.Remove(new TownId(0b_1001_0101)));
+
+                var expected = new[] {
+                    "Levice", "Trnava", "Snina", "Senica", "Púchov"
+                };
+                var actual = f.Select(t => t.Name).ToArray();
+                CollectionAssert.AreEqual(expected, actual);
+            }
+        }
+
+
     }
 }

@@ -12,7 +12,7 @@ namespace ExtendibleHashing.FileHandlers
         internal bool Read(out int blockByteSize, out List<int> blockAddresses, out List<int> blockBitDepths,
             out List<int> blockItemCounts, out List<bool> fileBlockOccupation, out int fBitDepth)
         {
-            throw new NotImplementedException();
+            throw new NotImplementedException(); // TODO
             blockByteSize = -1;
             blockAddresses = null;
             blockBitDepths = null;
@@ -44,7 +44,7 @@ namespace ExtendibleHashing.FileHandlers
         internal void Write(int blockByteSize, List<int> blockAddresses, List<int> blockBitDepths,
             List<int> blockItemCounts, List<bool> fileBlockOccupation, int fileBitDepth)
         {
-            throw new NotImplementedException();
+            throw new NotImplementedException(); // TODO
             var linesToWrite = new string[6];
             linesToWrite[0] = blockByteSize.ToString();
             linesToWrite[1] = string.Join(Separator.ToString(), blockAddresses);

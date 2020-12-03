@@ -86,16 +86,35 @@ namespace ExtendibleHashing
         internal T Find(int mainFileAddress, T itemId)
         {
             List<OverfillingBlockInfo> infoList = GetBlocksInfoSeries(mainFileAddress);
-            foreach (var blockInfo in infoList)
+            if (infoList != null)
             {
-                OverfillingBlock<T> block = LoadBlock(blockInfo);
-                foreach (var item in block)
+                foreach (var blockInfo in infoList)
                 {
-                    if (item.IdEquals(itemId))
-                        return item;
+                    OverfillingBlock<T> block = LoadBlock(blockInfo);
+                    T found = block.Find(itemId);
+                    if (found != null)
+                        return found;
                 }
             }
             return default;
+        }
+
+        internal bool Remove(int mainFileAddress, T itemId)
+        {
+            List<OverfillingBlockInfo> infoList = GetBlocksInfoSeries(mainFileAddress);
+            if (infoList != null)
+            {
+                foreach (var info in infoList)
+                {
+                    var block = LoadBlock(info);
+                    if (block.Remove(itemId))
+                    {
+                        Save(block);
+                        return true;
+                    }
+                }
+            }
+            return false;
         }
 
         private OverfillingBlockInfo GetNotFullBlockInfo(int mainFileAddress)
