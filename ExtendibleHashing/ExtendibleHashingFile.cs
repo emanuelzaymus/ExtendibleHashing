@@ -36,7 +36,7 @@ namespace ExtendibleHashing
             {
                 var block = _file.GetDataBlock(item);
 
-                if (block.IsFull) // TODO: I should be able to know this without readinf it from the file.
+                if (block.IsFull) // TODO: I should be able to know this without reading it from the file.
                 {
                     if (_file.BitDepth == block.BitDepth)
                     {
@@ -83,7 +83,11 @@ namespace ExtendibleHashing
             var block = _file.GetDataBlock(itemId);
             if (block.Remove(itemId))
             {
-                bool mergedAndSaved = _file.TryMergeAndSave(block);
+                bool mergedAndSaved = false;
+                if (!_overfillFile.ContainsAddress(block.InFileAddress))
+                {
+                    mergedAndSaved = _file.TryMergeAndSave(block);
+                }
                 if (!mergedAndSaved)
                 {
                     _file.Save(block);
@@ -91,9 +95,29 @@ namespace ExtendibleHashing
                 wasRemoved = true;
             }
             else wasRemoved = _overfillFile.Remove(block.InFileAddress, itemId);
+
             if (wasRemoved)
             {
-                //todo: shring overfillFile is possible
+                int overfillBlockCount = _overfillFile.BlockCountForAddress(block.InFileAddress);
+                if (overfillBlockCount > 0)
+                {
+                    int freeItemsInMainBlock = block.MaxItemCount - block.ItemCount;
+
+                    int itemCountForAddress = _overfillFile.ItemCountForAddress(block.InFileAddress);
+                    int blockMaxItemCount = _overfillFile.BlockMaxItemCount.Value;
+
+                    // May I shrink overfillig file? Can shrink the file only if it saves at least one free block.
+                    int freeItems = overfillBlockCount * blockMaxItemCount - itemCountForAddress;
+                    if (freeItems + freeItemsInMainBlock >= blockMaxItemCount || block.ItemCount == 0)
+                    {
+                        var items = _overfillFile.ShrinkAndGetItems(block.InFileAddress, freeItemsInMainBlock);
+                        if (items.Count > 0)
+                        {
+                            items.ForEach(i => block.Add(i));
+                            _file.Save(block);
+                        }
+                    }
+                }
             }
             return wasRemoved;
         }

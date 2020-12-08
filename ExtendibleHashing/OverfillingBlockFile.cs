@@ -1,4 +1,5 @@
 ﻿using ExtendibleHashing.DataInterfaces;
+using ExtendibleHashing.Extensions;
 using ExtendibleHashing.FileHandlers;
 using System;
 using System.Collections;
@@ -16,7 +17,20 @@ namespace ExtendibleHashing
 
         private readonly List<List<OverfillingBlockInfo>> _blocksInfo = new List<List<OverfillingBlockInfo>>(); // Information about overfilling blocks.
 
-        private readonly List<bool> _blockOccupation = new List<bool>() { false }; // Occupaci of blocks.
+        private readonly List<bool> _blockOccupation = new List<bool>() { false }; // Occupation of blocks.
+
+        public int? BlockMaxItemCount
+        {
+            get
+            {
+                foreach (var infoList in _blocksInfo)
+                {
+                    foreach (var info in infoList)
+                        return info.MaxItemCount;
+                }
+                return null;
+            }
+        }
 
         public OverfillingBlockFile(string overfillingFilePath, FileMode fileMode, int blockByteSize, OverfillingManagingFileHandler managingFile)
         {
@@ -83,6 +97,11 @@ namespace ExtendibleHashing
             return new OverfillingBlock<T>(_blockByteSize, blockInfo, data);
         }
 
+        internal bool ContainsAddress(int mainFileAddress)
+        {
+            return GetBlocksInfoSeries(mainFileAddress) != null;
+        }
+
         internal T Find(int mainFileAddress, T itemId)
         {
             List<OverfillingBlockInfo> infoList = GetBlocksInfoSeries(mainFileAddress);
@@ -115,6 +134,123 @@ namespace ExtendibleHashing
                 }
             }
             return false;
+        }
+
+        internal List<T> ShrinkAndGetItems(int mainFileAddress, int countToReturn)
+        {
+            List<OverfillingBlockInfo> infoList = GetBlocksInfoSeries(mainFileAddress);
+            if (infoList == null)
+                throw new Exception("Address does not exist.");
+
+            List<T> collectedItems = GetAllItems(infoList);
+            infoList.ForEach(info => info.ItemCount = 0);
+
+            if (collectedItems.Count <= countToReturn)
+            {
+                Shrink(mainFileAddress);
+                ReduceFileSizeIfPossible();
+                return collectedItems;
+            }
+
+            // Fill ret list
+            List<T> ret = new List<T>(countToReturn);
+            while (ret.Count < countToReturn)
+            {
+                ret.Add(collectedItems.PopLast());
+            }
+
+            foreach (var info in infoList.OrderBy(i => i.Address))
+            {
+                OverfillingBlock<T> block = new OverfillingBlock<T>(_blockByteSize, info);
+                while (!block.IsFull && collectedItems.Count > 0)
+                    block.Add(collectedItems.PopFirst());
+
+                Save(block);
+
+                if (collectedItems.Count == 0)
+                    break;
+            }
+            Shrink(mainFileAddress);
+            ReduceFileSizeIfPossible();
+            return ret;
+        }
+
+        private void ReduceFileSizeIfPossible()
+        {
+            _file.ReduceSizeIfPossible((_blockOccupation.LastIndexOf(true) + 1) * _blockByteSize);
+        }
+
+
+        private void Shrink(int mainFileAddress)
+        {
+            for (int i = 0; i < _blocksInfo.Count; i++)
+            {
+                List<OverfillingBlockInfo> infoSeries = _blocksInfo[i];
+                if (infoSeries[0].MainFileAddress == mainFileAddress)
+                {
+                    for (int j = 0; j < infoSeries.Count; j++)
+                    {
+                        if (infoSeries[j].ItemCount == 0)
+                        {
+                            FreeUpBlockAddress(infoSeries[j].Address);
+                            infoSeries.RemoveAt(j--);
+                        }
+                    }
+                }
+                if (infoSeries.Count == 0)
+                    _blocksInfo.RemoveAt(i--);
+            }
+        }
+
+        private void FreeUpBlockAddress(int address)
+        {
+            int blockOccupationIndex = address / _blockByteSize;
+            _blockOccupation[blockOccupationIndex] = false;
+
+            // If last two blocks are empty remove the last one -> at the end keep one empty for future new DataBlock
+            while (_blockOccupation.Count > 2
+                && _blockOccupation[_blockOccupation.Count - 1] == false
+                && _blockOccupation[_blockOccupation.Count - 2] == false)
+            {
+                _blockOccupation.RemoveAt(_blockOccupation.Count - 1);
+            }
+        }
+
+        private List<T> GetAllItems(List<OverfillingBlockInfo> infoList)
+        {
+            List<T> collectedItems = new List<T>();
+            if (infoList != null)
+            {
+                foreach (var info in infoList)
+                {
+                    if (info.ItemCount != 0)
+                    {
+                        OverfillingBlock<T> overfillingBlocks = LoadBlock(info);
+                        collectedItems.AddRange(overfillingBlocks);
+                    }
+                }
+            }
+            return collectedItems;
+        }
+
+        internal int BlockCountForAddress(int mainFileAddress)
+        {
+            List<OverfillingBlockInfo> infoList = GetBlocksInfoSeries(mainFileAddress);
+            if (infoList != null)
+            {
+                return infoList.Count;
+            }
+            return 0;
+        }
+
+        internal int ItemCountForAddress(int mainFileAddress)
+        {
+            List<OverfillingBlockInfo> infoList = GetBlocksInfoSeries(mainFileAddress);
+            if (infoList != null)
+            {
+                return infoList.Select(il => il.ItemCount).Sum();
+            }
+            return 0;
         }
 
         private OverfillingBlockInfo GetNotFullBlockInfo(int mainFileAddress)
@@ -154,7 +290,11 @@ namespace ExtendibleHashing
 
         internal void SaveManagingData(OverfillingManagingFileHandler overfillingManagingFile)
         {
-            //throw new NotImplementedException();
+            // TODO: not implemented
+            if (_blocksInfo.Count > 0)
+            {
+            }
+            //overfillingManagingFile.Write(_blockByteSize, _blockOccupation, );
         }
 
         public void Dispose()

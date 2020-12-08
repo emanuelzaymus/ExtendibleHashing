@@ -25,5 +25,20 @@ namespace ExtendibleHashing.Extensions
             }
             return ret;
         }
+
+        public static T PopFirst<T>(this List<T> list)
+        {
+            T ret = list[0];
+            list.RemoveAt(0);
+            return ret;
+        }
+
+        public static T PopLast<T>(this List<T> list)
+        {
+            T ret = list[list.Count - 1];
+            list.RemoveAt(list.Count - 1);
+            return ret;
+        }
+
     }
 }

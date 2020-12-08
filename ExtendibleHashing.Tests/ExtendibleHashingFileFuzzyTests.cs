@@ -95,7 +95,7 @@ namespace ExtendibleHashing.Tests
 
         [TestMethod]
         [Timeout(15000)]
-        public void FuzzyAdd_With3DithDepth_ShoudAddToOverfillingFile()
+        public void FuzzyAdd_With3BitDepth_ShoudAddToOverfillingFile()
         {
             int count = 5000;
             var checkList = RandomTownGenerator.GenerateTowns(count).ToList();
@@ -107,7 +107,7 @@ namespace ExtendibleHashing.Tests
 
         [TestMethod]
         [Timeout(20000)]
-        public void FuzzyFind_With3DithDepth_ShoudFindInOverfillingFile()
+        public void FuzzyFind_With3BitDepth_ShoudFindInOverfillingFile()
         {
             int count = 8000;
             var checkList = RandomTownGenerator.GenerateTowns(count).ToList();
@@ -123,7 +123,7 @@ namespace ExtendibleHashing.Tests
 
         [TestMethod]
         [Timeout(20000)]
-        public void FuzzyRemove_With3DithDepth_ShoudRemovefromOverfillingFile()
+        public void FuzzyRemove_With3BitDepth_ShoudRemovefromOverfillingFile()
         {
             int count = 5000;
             var checkList = new LinkedList<Town>(RandomTownGenerator.GenerateTowns(count));
@@ -146,66 +146,84 @@ namespace ExtendibleHashing.Tests
         [Timeout(20000)]
         public void Fuzzing()
         {
-            Random r = new Random(55);
-
             int initCount = 700;
             var checkList = RandomTownGenerator.GenerateTowns(initCount).ToList();
 
             using (var file = GetExtendibleHashingFile(checkList))
             {
-                Town town;
-                for (int i = 0; i < 10000; i++)
-                {
-                    switch (r.Next(3))
-                    {
-                        case 0: // Add
-                            town = RandomTownGenerator.GenerateTown();
-                            checkList.Add(town);
-                            file.Add(town);
-                            Assert.AreEqual(town, file.Find(new TownId(town.Id)));
+                ExecuteFuzzyingWithFile(file, checkList, 10000);
+            }
+        }
 
-                            CollectionAssert.AreEquivalent(checkList, file.ToList());
-                            break;
-                        case 1: // Find
-                            if (r.NextDouble() < 0.9)
+        [TestMethod]
+        [Timeout(20000)]
+        public void Fuzzing_With3BitDepth()
+        {
+            int initCount = 700;
+            var checkList = RandomTownGenerator.GenerateTowns(initCount).ToList();
+
+            using (var file = GetExtendibleHashingFileWith3BitDepth(checkList))
+            {
+                ExecuteFuzzyingWithFile(file, checkList, 10000);
+            }
+        }
+
+        private void ExecuteFuzzyingWithFile(ExtendibleHashingFile<Town> file, List<Town> checkList, int iterations)
+        {
+            Random r = new Random(55);
+
+            Town town;
+            for (int i = 0; i < iterations; i++)
+            {
+                switch (r.Next(3))
+                {
+                    case 0: // Add
+                        town = RandomTownGenerator.GenerateTown();
+                        checkList.Add(town);
+                        file.Add(town);
+                        Assert.AreEqual(town, file.Find(new TownId(town.Id)));
+
+                        CollectionAssert.AreEquivalent(checkList, file.ToList());
+                        break;
+                    case 1: // Find
+                        if (r.NextDouble() < 0.9)
+                        {
+                            town = checkList[r.Next(checkList.Count)];
+                            Assert.AreEqual(town, file.Find(new TownId(town.Id)));
+                        }
+                        else
+                        {
+                            int randId = RandomTownGenerator.RandomId();
+                            town = checkList.FirstOrDefault(x => x.Id == randId);
+                            Assert.AreEqual(town, file.Find(new TownId(randId)));
+                        }
+                        break;
+                    case 2: // Remove
+                        if (r.NextDouble() < 0.9)
+                        {
+                            town = checkList[r.Next(checkList.Count)];
+                            Assert.IsTrue(file.Remove(new TownId(town.Id)));
+                            Assert.IsNull(file.Find(new TownId(town.Id)));
+                            checkList.Remove(town);
+                        }
+                        else
+                        {
+                            int randId = RandomTownGenerator.RandomId();
+                            town = checkList.FirstOrDefault(x => x.Id == randId);
+                            if (town == null)
                             {
-                                town = checkList[r.Next(checkList.Count)];
-                                Assert.AreEqual(town, file.Find(new TownId(town.Id)));
+                                Assert.IsFalse(file.Remove(new TownId(randId)));
                             }
                             else
                             {
-                                int randId = RandomTownGenerator.RandomId();
-                                town = checkList.FirstOrDefault(x => x.Id == randId);
-                                Assert.AreEqual(town, file.Find(new TownId(randId)));
+                                Assert.IsTrue(file.Remove(new TownId(randId)));
+                                checkList.RemoveAll(x => x.Id == randId);
                             }
-                            break;
-                        case 2: // Remove
-                            if (r.NextDouble() < 0.9)
-                            {
-                                town = checkList[r.Next(checkList.Count)];
-                                Assert.IsTrue(file.Remove(new TownId(town.Id)));
-                                Assert.IsNull(file.Find(new TownId(town.Id)));
-                                checkList.Remove(town);
-                            }
-                            else
-                            {
-                                int randId = RandomTownGenerator.RandomId();
-                                town = checkList.FirstOrDefault(x => x.Id == randId);
-                                if (town == null)
-                                {
-                                    Assert.IsFalse(file.Remove(new TownId(randId)));
-                                }
-                                else
-                                {
-                                    Assert.IsTrue(file.Remove(new TownId(randId)));
-                                    checkList.RemoveAll(x => x.Id == randId);
-                                }
-                            }
-                            CollectionAssert.AreEquivalent(checkList, file.ToList());
-                            break;
-                        default:
-                            break;
-                    }
+                        }
+                        CollectionAssert.AreEquivalent(checkList, file.ToList());
+                        break;
+                    default:
+                        break;
                 }
             }
         }

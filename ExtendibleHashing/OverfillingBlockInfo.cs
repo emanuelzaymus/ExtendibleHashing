@@ -14,5 +14,14 @@
             MainFileAddress = mainFileAddress;
             Address = address;
         }
+
+        public OverfillingBlockInfo(int mainFileAddress, int address, int maxItemCount, int itemCount)
+        {
+            MainFileAddress = mainFileAddress;
+            Address = address;
+            MaxItemCount = maxItemCount;
+            ItemCount = itemCount;
+        }
+
     }
 }
