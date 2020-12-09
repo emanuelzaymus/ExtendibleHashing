@@ -36,16 +36,14 @@ namespace ExtendibleHashing
         {
             _blockByteSize = blockByteSize;
 
-            //if (fileMode != FileMode.Create &&
-            //    fileMode != FileMode.CreateNew &&
-            //    managingFile.Read(out int bByteSize))
-            //{
-            //    _blockByteSize = bByteSize;
-            //    BlockAddresses = bAddresses;
-            //    _blockBitDepths = bBitDepths;
-            //    _blockItemCounts = bItemCounts;
-            //    _blockOccupation = bOccupation;
-            //}
+            if (fileMode != FileMode.Create &&
+                fileMode != FileMode.CreateNew &&
+                managingFile.Read(out int bByteSize, out List<bool> fBlockOccupation, out List<List<OverfillingBlockInfo>> bInfo))
+            {
+                _blockByteSize = bByteSize;
+                _blockOccupation = fBlockOccupation;
+                _blocksInfo = bInfo;
+            }
 
             _file = new BinaryFileHandler(overfillingFilePath, fileMode, _blockByteSize);
         }
@@ -100,6 +98,16 @@ namespace ExtendibleHashing
         internal bool ContainsAddress(int mainFileAddress)
         {
             return GetBlocksInfoSeries(mainFileAddress) != null;
+        }
+
+        internal List<int> GetAllMainFileAddresses()
+        {
+            var ret = new List<int>();
+            foreach (var infoList in _blocksInfo)
+            {
+                ret.Add(infoList[0].MainFileAddress);
+            }
+            return ret;
         }
 
         internal T Find(int mainFileAddress, T itemId)
@@ -290,11 +298,7 @@ namespace ExtendibleHashing
 
         internal void SaveManagingData(OverfillingManagingFileHandler overfillingManagingFile)
         {
-            // TODO: not implemented
-            if (_blocksInfo.Count > 0)
-            {
-            }
-            //overfillingManagingFile.Write(_blockByteSize, _blockOccupation, );
+            overfillingManagingFile.Write(_blockByteSize, _blockOccupation, _blocksInfo);
         }
 
         public void Dispose()

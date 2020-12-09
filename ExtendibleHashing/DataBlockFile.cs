@@ -190,12 +190,12 @@ namespace ExtendibleHashing
             return (int)Math.Pow(2, BitDepth - block.BitDepth);
         }
 
-        public bool TryMergeAndSave(DataBlock<T> block)
+        public bool TryMergeAndSave(DataBlock<T> block, List<int> addressesWithOverfillingBlocks)
         {
             bool saved = false;
             while (true)
             {
-                if (IsPossibleToMergeWithNeighbourBlock(block, out int neighbourIndex))
+                if (IsPossibleToMergeWithNeighbourBlock(block, addressesWithOverfillingBlocks, out int neighbourIndex))
                 {
                     var neighbourBlock = GetDataBlockByIndex(neighbourIndex);
                     block = MergeBlocks(block, neighbourBlock);
@@ -298,10 +298,11 @@ namespace ExtendibleHashing
             }
         }
 
-        private bool IsPossibleToMergeWithNeighbourBlock(DataBlock<T> block, out int foundNeighbourIndex)
+        private bool IsPossibleToMergeWithNeighbourBlock(DataBlock<T> block, List<int> addressesWithOverfillingBlocks, out int foundNeighbourIndex)
         {
             int? neighbourIndex = GetNeighbourIndex(block);
-            if (neighbourIndex.HasValue)
+            // If address of found index is in overfillinf file it cannot be merged.
+            if (neighbourIndex.HasValue && addressesWithOverfillingBlocks.Contains(BlockAddresses[neighbourIndex.Value]))
             {
                 int maxCount = block.MaxItemCount;
                 foundNeighbourIndex = neighbourIndex.Value;

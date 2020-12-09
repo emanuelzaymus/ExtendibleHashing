@@ -36,7 +36,7 @@ namespace ExtendibleHashing
             {
                 var block = _file.GetDataBlock(item);
 
-                if (block.IsFull) // TODO: I should be able to know this without reading it from the file.
+                if (block.IsFull)
                 {
                     if (_file.BitDepth == block.BitDepth)
                     {
@@ -86,7 +86,7 @@ namespace ExtendibleHashing
                 bool mergedAndSaved = false;
                 if (!_overfillFile.ContainsAddress(block.InFileAddress))
                 {
-                    mergedAndSaved = _file.TryMergeAndSave(block);
+                    mergedAndSaved = _file.TryMergeAndSave(block, _overfillFile.GetAllMainFileAddresses());
                 }
                 if (!mergedAndSaved)
                 {

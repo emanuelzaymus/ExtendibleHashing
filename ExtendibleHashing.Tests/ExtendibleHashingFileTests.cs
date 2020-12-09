@@ -713,5 +713,99 @@ namespace ExtendibleHashing.Tests
             }
         }
 
+        [TestMethod]
+        public void LoadingFilesFromOverfillingFile_ValidFiles_ShouldLoadAllDataFromFiles()
+        {
+            var f = GetExtendibleHashingFileWith3BitDepthFilled();
+            f.Add(new Town(0b_1111_0101, "Mesto 1"));
+            f.Add(new Town(0b_0111_0101, "Mesto 2"));
+            f.Add(new Town(0b_1011_0101, "Mesto 3"));
+            f.Add(new Town(0b_0011_0101, "Mesto 4"));
+            f.Add(new Town(0b_1001_0101, "Mesto 5"));
+            f.Add(new Town(0b_0101_0101, "Mesto 6"));
+            f.Add(new Town(0b_1100_0101, "Mesto 7"));
+            f.Add(new Town(0b_1000_0101, "Mesto 8"));
+            f.Add(new Town(0b_0100_0101, "Mesto 9"));
+            f.Add(new Town(0b_0010_0101, "Mesto 10"));
+            f.Dispose();
+
+            using (f = new ExtendibleHashingFile<Town>(FilePath, OverfillingFilePath, ManagerFilePath, OverfillingManagerFilePath))
+            {
+                var expected = new[] {
+                    "Levice", "Trnava","Snina", "Senica", "Púchov",
+                    "Mesto 1", "Mesto 2", "Mesto 3", "Mesto 4", "Mesto 5",
+                    "Mesto 6", "Mesto 7", "Mesto 8", "Mesto 9", "Mesto 10"
+                };
+                var actual = f.Select(t => t.Name).ToArray();
+                CollectionAssert.AreEqual(expected, actual);
+
+                f.Add(new Town(0, "Žilina"));
+                f.Add(new Town(0b_0001_0101, "Mesto 11"));
+
+                expected = new[] {
+                    "Žilina",
+                    "Levice", "Trnava","Snina", "Senica", "Púchov",
+                    "Mesto 1", "Mesto 2", "Mesto 3", "Mesto 4", "Mesto 5",
+                    "Mesto 6", "Mesto 7", "Mesto 8", "Mesto 9", "Mesto 10",
+                    "Mesto 11"
+                };
+                actual = f.Select(t => t.Name).ToArray();
+                CollectionAssert.AreEqual(expected, actual);
+            }
+        }
+
+        [TestMethod]
+        public void LoadingFilesFromOverfillingFile_NoData_ShouldLoadNoDataCorrectly()
+        {
+            var f = GetExtendibleHashingFileWith3BitDepth();
+            f.Dispose();
+
+            using (f = new ExtendibleHashingFile<Town>(FilePath, OverfillingFilePath, ManagerFilePath, OverfillingManagerFilePath))
+            {
+                var expected = new string[0];
+                var actual = f.Select(t => t.Name).ToArray();
+                CollectionAssert.AreEqual(expected, actual);
+
+                f.Add(new Town(0b_1111_0101, "Mesto 1"));
+                f.Add(new Town(0b_0111_0101, "Mesto 2"));
+                f.Add(new Town(0b_1011_0101, "Mesto 3"));
+                f.Add(new Town(0b_0011_0101, "Mesto 4"));
+                f.Add(new Town(0b_1001_0101, "Mesto 5"));
+                f.Add(new Town(0b_0101_0101, "Mesto 6"));
+                f.Add(new Town(0b_1100_0101, "Mesto 7"));
+                f.Add(new Town(0b_1000_0101, "Mesto 8"));
+                f.Add(new Town(0b_0100_0101, "Mesto 9"));
+                f.Add(new Town(0b_0010_0101, "Mesto 10"));
+            }
+
+            using (f = new ExtendibleHashingFile<Town>(FilePath, OverfillingFilePath, ManagerFilePath, OverfillingManagerFilePath))
+            {
+                var expected = new[] {
+                    "Mesto 1", "Mesto 2", "Mesto 3", "Mesto 4", "Mesto 5",
+                    "Mesto 6", "Mesto 7", "Mesto 8", "Mesto 9", "Mesto 10"
+                };
+                var actual = f.Select(t => t.Name).ToArray();
+                CollectionAssert.AreEqual(expected, actual);
+
+                Assert.IsTrue(f.Remove(new TownId(0b_1111_0101)));
+                Assert.IsTrue(f.Remove(new TownId(0b_0111_0101)));
+                Assert.IsTrue(f.Remove(new TownId(0b_1011_0101)));
+                Assert.IsTrue(f.Remove(new TownId(0b_0011_0101)));
+                Assert.IsTrue(f.Remove(new TownId(0b_1001_0101)));
+                Assert.IsTrue(f.Remove(new TownId(0b_0101_0101)));
+                Assert.IsTrue(f.Remove(new TownId(0b_1100_0101)));
+                Assert.IsTrue(f.Remove(new TownId(0b_1000_0101)));
+                Assert.IsTrue(f.Remove(new TownId(0b_0100_0101)));
+                Assert.IsTrue(f.Remove(new TownId(0b_0010_0101)));
+            }
+
+            using (f = new ExtendibleHashingFile<Town>(FilePath, OverfillingFilePath, ManagerFilePath, OverfillingManagerFilePath))
+            {
+                var expected = new string[0];
+                var actual = f.Select(t => t.Name).ToArray();
+                CollectionAssert.AreEqual(expected, actual);
+            }
+        }
+
     }
 }
