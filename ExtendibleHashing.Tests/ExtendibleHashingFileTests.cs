@@ -146,7 +146,7 @@ namespace ExtendibleHashing.Tests
                 CollectionAssert.AreEqual(expected, actual);
 
                 // Double the size
-                f.Add(new Town(0b1000_1110, "My Town 3")); // address: 0111
+                f.Add(new Town(0b1100_1110, "My Town 3")); // address: 0111
                 f.Add(new Town(0b1000_0110, "My Town 4")); // address: 0110
                 expected = new[] {
                     "Žilina", "Poprad", "Ilava", "Brezno",

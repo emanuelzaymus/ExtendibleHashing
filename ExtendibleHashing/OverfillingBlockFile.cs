@@ -50,6 +50,9 @@ namespace ExtendibleHashing
 
         internal void Add(int mainFileAddress, T item)
         {
+            if (ContainsItem(mainFileAddress, item))
+                throw new ArgumentException("This item is already present in the file.");
+
             var blockInfo = GetNotFullBlockInfo(mainFileAddress);
             OverfillingBlock<T> block;
             if (blockInfo != null)
@@ -64,6 +67,21 @@ namespace ExtendibleHashing
             }
             block.Add(item);
             Save(block);
+        }
+
+        private bool ContainsItem(int mainFileAddress, T item)
+        {
+            List<OverfillingBlockInfo> infoList = GetBlocksInfoSeries(mainFileAddress);
+            if (infoList != null)
+            {
+                foreach (var info in infoList)
+                {
+                    OverfillingBlock<T> block = LoadBlock(info);
+                    if (block.Find(item) != null)
+                        return true;
+                }
+            }
+            return false;
         }
 
         private void Save(OverfillingBlock<T> block)

@@ -49,6 +49,9 @@ namespace ExtendibleHashing
 
         public void Add(T item)
         {
+            if (Contains(item))
+                throw new ArgumentException("This item is already present in the file.");
+
             if (!IsFull)
             {
                 _items.Add(item);
