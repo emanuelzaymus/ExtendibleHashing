@@ -22,10 +22,10 @@ namespace ExtendibleHashing.Tests
                 OverfillingManagerFilePath, BlockByteSize, OverfillingBlockByteSize, FileMode.Create);
         }
 
-        public static ExtendibleHashingFile<Town> GetExtendibleHashingFileWith3BitDepth()
+        public static ExtendibleHashingFile<Town> GetExtendibleHashingFileWith3BitDepth(int blockByteSize = BlockByteSize, int overfillingBlockByteSize = OverfillingBlockByteSize)
         {
             return new ExtendibleHashingFile<Town>(FilePath, OverfillingFilePath, ManagerFilePath,
-                OverfillingManagerFilePath, BlockByteSize, OverfillingBlockByteSize, FileMode.Create, 3);
+                OverfillingManagerFilePath, blockByteSize, overfillingBlockByteSize, FileMode.Create, 3);
         }
 
         private ExtendibleHashingFile<Town> GetExtendibleHashingFileFilled()
@@ -33,9 +33,9 @@ namespace ExtendibleHashing.Tests
             return Fill(GetExtendibleHashingFile());
         }
 
-        public static ExtendibleHashingFile<Town> GetExtendibleHashingFileWith3BitDepthFilled()
+        public static ExtendibleHashingFile<Town> GetExtendibleHashingFileWith3BitDepthFilled(int blockyteSize = BlockByteSize, int overfillingBlockByteSize = OverfillingBlockByteSize)
         {
-            return FillUpOneBlock(GetExtendibleHashingFileWith3BitDepth());
+            return FillUpOneBlock(GetExtendibleHashingFileWith3BitDepth(blockyteSize, overfillingBlockByteSize));
         }
 
         private static ExtendibleHashingFile<Town> Fill(ExtendibleHashingFile<Town> f)
@@ -803,6 +803,53 @@ namespace ExtendibleHashing.Tests
             {
                 var expected = new string[0];
                 var actual = f.Select(t => t.Name).ToArray();
+                CollectionAssert.AreEqual(expected, actual);
+            }
+        }
+
+        [TestMethod]
+        public void Remove_AllDataFromBlock_ShouldNotMergeBecauseNeighbourHasOverfillingBlocks()
+        {
+            using (var f = GetExtendibleHashingFileWith3BitDepthFilled(overfillingBlockByteSize: OverfillingBlockByteSize * 2))
+            {
+                // Add to overfilling file
+                f.Add(new Town(0b_1111_0101, "Mesto 1"));
+                f.Add(new Town(0b_0111_0101, "Mesto 2"));
+                f.Add(new Town(0b_1011_0101, "Mesto 3"));
+                f.Add(new Town(0b_0011_0101, "Mesto 4"));
+                f.Add(new Town(0b_1001_0101, "Mesto 5"));
+                f.Add(new Town(0b_0101_0101, "Mesto 6"));
+
+                // Add to neighbour block
+                f.Add(new Town(0b_1010_1001, "Martin"));
+
+                var expected = new[] {
+                    "Martin",
+                    "Levice", "Trnava", "Snina", "Senica", "Púchov",
+                    "Mesto 1", "Mesto 2", "Mesto 3", "Mesto 4", "Mesto 5", "Mesto 6"
+                };
+                var actual = f.Select(t => t.Name).ToArray();
+                CollectionAssert.AreEqual(expected, actual);
+
+                Assert.IsTrue(f.Remove(new TownId(0b_0110_1101))); // "Snina"
+                Assert.IsTrue(f.Remove(new TownId(0b_0000_0101))); // "Senica"
+                Assert.IsTrue(f.Remove(new TownId(0b_1110_1101))); // "Púchov"
+
+                expected = new[] {
+                    "Martin",
+                    "Levice", "Trnava",
+                    "Mesto 1", "Mesto 2", "Mesto 3", "Mesto 4", "Mesto 5", "Mesto 6"
+                };
+                actual = f.Select(t => t.Name).ToArray();
+                CollectionAssert.AreEqual(expected, actual);
+
+                Assert.IsTrue(f.Remove(new TownId(0b_1010_1001))); // "Martin"
+
+                expected = new[] {
+                    "Levice", "Trnava",
+                    "Mesto 1", "Mesto 2", "Mesto 3", "Mesto 4", "Mesto 5", "Mesto 6"
+                };
+                actual = f.Select(t => t.Name).ToArray();
                 CollectionAssert.AreEqual(expected, actual);
             }
         }

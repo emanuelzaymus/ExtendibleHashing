@@ -24,20 +24,23 @@ namespace ExtendibleHashing.FileHandlers
 
                 blocksInfo = new List<List<OverfillingBlockInfo>>();
 
-                int lastMainFileAddress = -1;
-                for (int i = 3; i < lines.Length; i++)
+                if (maxItemCount >= 0)
                 {
-                    var numbers = lines[i].Split(Separator).Select(x => int.Parse(x)).ToArray();
-                    int mainFileAddress = numbers[0];
-                    int address = numbers[1];
-                    int itemCount = numbers[2];
-
-                    if (lastMainFileAddress != mainFileAddress)
+                    int lastMainFileAddress = -1;
+                    for (int i = 3; i < lines.Length; i++)
                     {
-                        lastMainFileAddress = mainFileAddress;
-                        blocksInfo.Add(new List<OverfillingBlockInfo>());
+                        var numbers = lines[i].Split(Separator).Select(x => int.Parse(x)).ToArray();
+                        int mainFileAddress = numbers[0];
+                        int address = numbers[1];
+                        int itemCount = numbers[2];
+
+                        if (lastMainFileAddress != mainFileAddress)
+                        {
+                            lastMainFileAddress = mainFileAddress;
+                            blocksInfo.Add(new List<OverfillingBlockInfo>());
+                        }
+                        blocksInfo[blocksInfo.Count - 1].Add(new OverfillingBlockInfo(mainFileAddress, address, maxItemCount, itemCount));
                     }
-                    blocksInfo[blocksInfo.Count - 1].Add(new OverfillingBlockInfo(mainFileAddress, address, maxItemCount, itemCount));
                 }
 
                 return blockByteSize > 0;
@@ -54,19 +57,23 @@ namespace ExtendibleHashing.FileHandlers
             linesToWrite.Add(blockByteSize.ToString()); // 0
             linesToWrite.Add(string.Join(Separator.ToString(), blockOccupation)); // 1
 
-            bool first = true;
+            bool wasWrittenMaxItemCountOfBlock = false;
 
             foreach (var infoList in blocksInfo)
             {
                 foreach (var info in infoList)
                 {
-                    if (first)
+                    if (!wasWrittenMaxItemCountOfBlock)
                     {
-                        first = false;
+                        wasWrittenMaxItemCountOfBlock = true;
                         linesToWrite.Add(info.MaxItemCount.ToString()); // 2
                     }
                     linesToWrite.Add(string.Join(Separator.ToString(), info.MainFileAddress, info.Address, info.ItemCount)); // 3 .. n
                 }
+            }
+            if (!wasWrittenMaxItemCountOfBlock)
+            {
+                linesToWrite.Add((-1).ToString()); // 2
             }
             File.WriteAllLines(_path, linesToWrite);
         }

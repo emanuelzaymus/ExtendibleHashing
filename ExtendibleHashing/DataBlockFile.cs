@@ -302,7 +302,7 @@ namespace ExtendibleHashing
         {
             int? neighbourIndex = GetNeighbourIndex(block);
             // If address of found index is in overfillinf file it cannot be merged.
-            if (neighbourIndex.HasValue && addressesWithOverfillingBlocks.Contains(BlockAddresses[neighbourIndex.Value]))
+            if (neighbourIndex.HasValue && !addressesWithOverfillingBlocks.Contains(BlockAddresses[neighbourIndex.Value]))
             {
                 int maxCount = block.MaxItemCount;
                 foundNeighbourIndex = neighbourIndex.Value;
