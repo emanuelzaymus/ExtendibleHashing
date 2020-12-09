@@ -183,6 +183,24 @@ namespace ExtendibleHashing
             return ret;
         }
 
+        internal bool Update(int mainFileAddress, T newItem)
+        {
+            List<OverfillingBlockInfo> infoList = GetBlocksInfoSeries(mainFileAddress);
+            if (infoList != null)
+            {
+                foreach (var blockInfo in infoList)
+                {
+                    OverfillingBlock<T> block = LoadBlock(blockInfo);
+                    if (block.Update(newItem))
+                    {
+                        Save(block);
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
         private void ReduceFileSizeIfPossible()
         {
             _file.ReduceSizeIfPossible((_blockOccupation.LastIndexOf(true) + 1) * _blockByteSize);

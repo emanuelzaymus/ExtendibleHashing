@@ -854,5 +854,101 @@ namespace ExtendibleHashing.Tests
             }
         }
 
+        [TestMethod]
+        public void Update_ItemInMainFile_ShouldUpdate()
+        {
+            using (var f = GetExtendibleHashingFileFilled())
+            {
+                Assert.IsTrue(f.Update(new Town(0b_1010_0110, "Lučenec"), new Town(0b_1010_0110, "Lučenec222")));
+                Assert.AreEqual(new Town(0b_1010_0110, "Lučenec222"), f.Find(new TownId(0b_1010_0110)));
+
+                var expected = new[] {
+                    "Žilina", "Poprad", "Ilava", "Brezno",
+                    "Košice", "Lučenec222", "Nitra",
+                    "Martin",
+                    "Levice", "Trnava", "Snina", "Senica", "Púchov",
+                    "Zvolen", "Prešov"
+                };
+                var actual = f.Select(t => t.Name).ToArray();
+                CollectionAssert.AreEqual(expected, actual);
+            }
+        }
+
+        [TestMethod]
+        public void Update_NotExistingItemInMainFile_ShouldNotDoAnything()
+        {
+            using (var f = GetExtendibleHashingFileFilled())
+            {
+                Assert.IsFalse(f.Update(new Town(9999, "Lučenec"), new Town(9999, "Lučenec2")));
+
+                var expected = new[] {
+                    "Žilina", "Poprad", "Ilava", "Brezno",
+                    "Košice", "Lučenec", "Nitra",
+                    "Martin",
+                    "Levice", "Trnava", "Snina", "Senica", "Púchov",
+                    "Zvolen", "Prešov"
+                };
+                var actual = f.Select(t => t.Name).ToArray();
+                CollectionAssert.AreEqual(expected, actual);
+            }
+        }
+
+        [TestMethod]
+        public void Update_ItemInOverfillingFile_ShouldUpdate()
+        {
+            using (var f = GetExtendibleHashingFileWith3BitDepthFilled())
+            {
+                f.Add(new Town(0b_1111_0101, "Mesto 1"));
+                f.Add(new Town(0b_0111_0101, "Mesto 2"));
+                f.Add(new Town(0b_1011_0101, "Mesto 3"));
+                f.Add(new Town(0b_0011_0101, "Mesto 4"));
+                f.Add(new Town(0b_1001_0101, "Mesto 5"));
+                f.Add(new Town(0b_0101_0101, "Mesto 6"));
+
+                Assert.IsTrue(f.Update(new Town(0b_0011_0101, "Mesto 4"), new Town(0b_0011_0101, "Mesto 444")));
+                Assert.AreEqual(new Town(0b_0011_0101, "Mesto 444"), f.Find(new TownId(0b_0011_0101)));
+
+                var expected = new[] {
+                    "Levice", "Trnava", "Snina", "Senica", "Púchov",
+                    "Mesto 1", "Mesto 2", "Mesto 3", "Mesto 444", "Mesto 5", "Mesto 6"
+                };
+                var actual = f.Select(t => t.Name).ToArray();
+                CollectionAssert.AreEqual(expected, actual);
+
+                Assert.IsTrue(f.Update(new Town(0b_0101_0101, "Mesto 6"), new Town(0b_0101_0101, "Mesto 6789")));
+                Assert.AreEqual(new Town(0b_0101_0101, "Mesto 6789"), f.Find(new TownId(0b_0101_0101)));
+
+                expected = new[] {
+                    "Levice", "Trnava", "Snina", "Senica", "Púchov",
+                    "Mesto 1", "Mesto 2", "Mesto 3", "Mesto 444", "Mesto 5", "Mesto 6789"
+                };
+                actual = f.Select(t => t.Name).ToArray();
+                CollectionAssert.AreEqual(expected, actual);
+            }
+        }
+
+        [TestMethod]
+        public void Update_NotExistingItemInOverfillingFile_ShouldNotDoAnything()
+        {
+            using (var f = GetExtendibleHashingFileWith3BitDepthFilled())
+            {
+                f.Add(new Town(0b_1111_0101, "Mesto 1"));
+                f.Add(new Town(0b_0111_0101, "Mesto 2"));
+                f.Add(new Town(0b_1011_0101, "Mesto 3"));
+                f.Add(new Town(0b_0011_0101, "Mesto 4"));
+                f.Add(new Town(0b_1001_0101, "Mesto 5"));
+                f.Add(new Town(0b_0101_0101, "Mesto 6"));
+
+                Assert.IsFalse(f.Update(new Town(0b_1000_0101, "Mesto 4"), new Town(0b_1000_0101, "Mesto 444")));
+
+                var expected = new[] {
+                    "Levice", "Trnava", "Snina", "Senica", "Púchov",
+                    "Mesto 1", "Mesto 2", "Mesto 3", "Mesto 4", "Mesto 5", "Mesto 6"
+                };
+                var actual = f.Select(t => t.Name).ToArray();
+                CollectionAssert.AreEqual(expected, actual);
+            }
+        }
+
     }
 }

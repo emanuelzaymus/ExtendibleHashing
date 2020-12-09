@@ -122,8 +122,8 @@ namespace ExtendibleHashing.Tests
         }
 
         [TestMethod]
-        [Timeout(20000)]
-        public void FuzzyRemove_With3BitDepth_ShoudRemovefromOverfillingFile()
+        [Timeout(25000)]
+        public void FuzzyRemove_With3BitDepth_ShoudRemoveFromOverfillingFile()
         {
             int count = 5000;
             var checkList = new LinkedList<Town>(RandomTownGenerator.GenerateTowns(count));
@@ -144,9 +144,49 @@ namespace ExtendibleHashing.Tests
 
         [TestMethod]
         [Timeout(20000)]
+        public void FuzzyUpdate_With3BitDepth_ShoudUpdateFromOverfillingFile()
+        {
+            int count = 5000;
+            var checkList = new List<Town>(RandomTownGenerator.GenerateTowns(count));
+            using (var f = GetExtendibleHashingFileWith3BitDepth(checkList))
+            {
+                for (int i = 0; i < checkList.Count; i++)
+                {
+                    var t = checkList[i];
+                    var newTown = new Town(t.Id, "name");
+                    Assert.IsTrue(f.Update(new TownId(t.Id), newTown));
+                    Assert.AreEqual(newTown, f.Find(new TownId(t.Id)));
+                    checkList[i] = newTown;
+                }
+                CollectionAssert.AreEquivalent(checkList, f.ToList());
+            }
+        }
+
+        [TestMethod]
+        [Timeout(20000)]
+        public void FuzzyUpdate_OnlyMainFile_ShoudUpdate()
+        {
+            int count = 5000;
+            var checkList = new List<Town>(RandomTownGenerator.GenerateTowns(count));
+            using (var f = GetExtendibleHashingFileWith3BitDepth(checkList))
+            {
+                for (int i = 0; i < checkList.Count; i++)
+                {
+                    var t = checkList[i];
+                    var newTown = new Town(t.Id, "name");
+                    Assert.IsTrue(f.Update(new TownId(t.Id), newTown));
+                    Assert.AreEqual(newTown, f.Find(new TownId(t.Id)));
+                    checkList[i] = newTown;
+                }
+                CollectionAssert.AreEquivalent(checkList, f.ToList());
+            }
+        }
+
+        [TestMethod]
+        [Timeout(20000)]
         public void Fuzzing()
         {
-            int initCount = 700;
+            int initCount = 500;
             var checkList = RandomTownGenerator.GenerateTowns(initCount).ToList();
 
             using (var file = GetExtendibleHashingFile(checkList))
@@ -159,7 +199,7 @@ namespace ExtendibleHashing.Tests
         [Timeout(20000)]
         public void Fuzzing_With3BitDepth()
         {
-            int initCount = 700;
+            int initCount = 500;
             var checkList = RandomTownGenerator.GenerateTowns(initCount).ToList();
 
             using (var file = GetExtendibleHashingFileWith3BitDepth(checkList))
@@ -175,7 +215,7 @@ namespace ExtendibleHashing.Tests
             Town town;
             for (int i = 0; i < iterations; i++)
             {
-                switch (r.Next(3))
+                switch (r.Next(4))
                 {
                     case 0: // Add
                         town = RandomTownGenerator.GenerateTown();
@@ -220,6 +260,16 @@ namespace ExtendibleHashing.Tests
                                 checkList.RemoveAll(x => x.Id == randId);
                             }
                         }
+                        CollectionAssert.AreEquivalent(checkList, file.ToList());
+                        break;
+                    case 3: // Update
+                        int randIndex = r.Next(checkList.Count);
+                        town = checkList[randIndex];
+                        var newTown = new Town(town.Id, "new name");
+                        Assert.IsTrue(file.Update(town, newTown));
+                        Assert.AreEqual(newTown, file.Find(new TownId(town.Id)));
+                        checkList[randIndex] = newTown;
+
                         CollectionAssert.AreEquivalent(checkList, file.ToList());
                         break;
                     default:

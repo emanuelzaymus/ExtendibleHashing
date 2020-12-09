@@ -124,12 +124,18 @@ namespace ExtendibleHashing
 
         public bool Update(T oldItem, T newItem)
         {
-            if (oldItem.IdEquals(newItem))
+            if (!oldItem.IdEquals(newItem))
             {
                 throw new ArgumentException($"Parameters {nameof(oldItem)} and {nameof(newItem)} do not equal in ID attributes.");
             }
-            // TODO implement update
-            throw new NotImplementedException();
+
+            var block = _file.GetDataBlock(oldItem);
+            if (block.Update(newItem))
+            {
+                _file.Save(block);
+                return true;
+            }
+            return _overfillFile.Update(block.InFileAddress, newItem);
         }
 
         public void Dispose()

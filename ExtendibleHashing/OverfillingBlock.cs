@@ -47,5 +47,18 @@ namespace ExtendibleHashing
             return false;
         }
 
+        internal bool Update(T newItem)
+        {
+            for (int i = 0; i < _items.Count; i++)
+            {
+                if (_items[i].IdEquals(newItem))
+                {
+                    _items[i] = newItem;
+                    return true;
+                }
+            }
+            return default;
+        }
+
     }
 }
