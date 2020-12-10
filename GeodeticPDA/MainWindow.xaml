@@ -27,7 +27,7 @@
 
         <Label Content="Number of Properties:" HorizontalAlignment="Left" Margin="10,332,0,0" VerticalAlignment="Top"/>
         <TextBox x:Name="NumberOfProperties" HorizontalAlignment="Left" Margin="142,336,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="194" Text="25"/>
-        <Button x:Name="GeneratePropertiesButton" Content="Generate Properties" HorizontalAlignment="Left" Margin="10,363,0,0" VerticalAlignment="Top" Width="326"/>
+        <Button x:Name="GeneratePropertiesButton" Content="Generate Properties" HorizontalAlignment="Left" Margin="10,363,0,0" VerticalAlignment="Top" Width="326" Click="GeneratePropertiesButton_Click"/>
 
         <Label Content="Main file:" HorizontalAlignment="Left" Margin="342,10,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.537,0.495"/>
         <Border BorderThickness="1" BorderBrush="Black" Margin="342,45,10,269">
@@ -38,6 +38,8 @@
             <ListBox x:Name="OverfillingFileListBox"/>
         </Border>
         <Button x:Name="ShowFilesContentButton" Content="Show Files Content" HorizontalAlignment="Left" Margin="10,531,0,0" VerticalAlignment="Top" Width="326" Click="ShowFilesContentButton_Click"/>
+        
+        <TextBlock x:Name="ManagingData" HorizontalAlignment="Left" Margin="10,388,0,0" Text="" TextWrapping="Wrap" VerticalAlignment="Top" Height="138" Width="326"/>
 
     </Grid>
 </Window>

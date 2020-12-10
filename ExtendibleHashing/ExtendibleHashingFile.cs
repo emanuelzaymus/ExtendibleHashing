@@ -5,7 +5,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 
 namespace ExtendibleHashing
 {
@@ -194,7 +193,7 @@ namespace ExtendibleHashing
             }
         }
 
-        public IEnumerable<PresentableBlockItem<T>> OverfillingFileItems()
+        public IEnumerable<PresentableOverfillingBlockItem<T>> OverfillingFileItems()
         {
             if (!_overfillFile.BlockMaxItemCount.HasValue)
             {
@@ -204,23 +203,35 @@ namespace ExtendibleHashing
             int index = 0;
             foreach (var block in _overfillFile.GetOverfillingBlocksSequentially())
             {
-                if (index * block.ByteSize == block.Address)
+                while (index * block.ByteSize != block.Address)
                 {
-                    foreach (var item in block)
-                    {
-                        yield return new PresentableBlockItem<T>(index, block.Address, item);
-                    }
-                    for (int j = block.Info.ItemCount; j < block.Info.MaxItemCount; j++)
-                    {
-                        yield return new PresentableBlockItem<T>(index, block.Address, default);
-                    }
+                    yield return new PresentableOverfillingBlockItem<T>(index, index * block.ByteSize);
+                    index++;
                 }
-                else
+
+                foreach (var item in block)
                 {
-                    yield return new PresentableBlockItem<T>(index, index * block.ByteSize);
+                    yield return new PresentableOverfillingBlockItem<T>(index, block.Address, block.Info.MainFileAddress, item);
+                }
+                for (int j = block.Info.ItemCount; j < block.Info.MaxItemCount; j++)
+                {
+                    yield return new PresentableOverfillingBlockItem<T>(index, block.Address, block.Info.MainFileAddress, default);
                 }
                 index++;
             }
+        }
+
+        public string GetManagingData()
+        {
+            string ret = "";
+            ret += $"File Bit Depth: {_file.BitDepth} (Max: {_file.MaxBitDepth})\n";
+            ret += "Block Addresses:\n";
+            ret += string.Join(", ", _file.BlockAddresses) + "\n";
+            ret += "Block Bit Depths:\n";
+            ret += string.Join(", ", _file.BlockBitDepths) + "\n";
+            ret += "File Block Occupation:\n";
+            ret += string.Join(", ", _file.BlockOccupation);
+            return ret;
         }
 
     }

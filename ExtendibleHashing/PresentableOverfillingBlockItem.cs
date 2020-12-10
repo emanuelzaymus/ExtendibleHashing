@@ -1,19 +1,19 @@
 ﻿namespace ExtendibleHashing
 {
-    public class PresentableBlockItem<T>
+    public class PresentableOverfillingBlockItem<T>
     {
         private bool _isInvalidBlock;
 
         public int Index { get; }
         public int Address { get; }
-        public int BitDepth { get; }
+        public int MainFileAddress { get; }
         public T Item { get; }
 
-        public PresentableBlockItem(int index, int address, int bitDepth, T item)
+        public PresentableOverfillingBlockItem(int index, int address, int mainFileAddress, T item)
         {
             Index = index;
             Address = address;
-            BitDepth = bitDepth;
+            MainFileAddress = mainFileAddress;
             Item = item;
             _isInvalidBlock = false;
         }
@@ -23,7 +23,7 @@
         /// </summary>
         /// <param name="index"></param>
         /// <param name="address"></param>
-        public PresentableBlockItem(int index, int address)
+        public PresentableOverfillingBlockItem(int index, int address)
         {
             Index = index;
             Address = address;
@@ -39,7 +39,7 @@
                 {
                     itm = Item.ToString();
                 }
-                return $"Index:{Index}; Addr:{Address}; BitDepth:{BitDepth}; {itm}";
+                return $"Index:{Index}; Addr:{Address}; MainFileAddr:{MainFileAddress}; {itm}";
             }
             return $"Index:{Index}; Addr:{Address}; INVALID BLOCK";
         }

@@ -1,9 +1,7 @@
 ﻿using GeodeticPDA.Model;
 using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Text;
 
 namespace GeodeticPDA.Presenter
 {
@@ -11,7 +9,7 @@ namespace GeodeticPDA.Presenter
     {
         private GeodeticPdaSystem _system = new GeodeticPdaSystem();
 
-        internal void AddProperty(string idStr, string numberStr, string desc,
+        internal bool AddProperty(string idStr, string numberStr, string desc,
             string gps1LatitudeStr, string gps1LongitudeStr, string gps2LatitudeStr, string gps2LongitudeStr)
         {
             int? id = ToInt(idStr);
@@ -33,9 +31,13 @@ namespace GeodeticPDA.Presenter
                 if (_system.AddProperty(newProperty))
                 {
                     Trace.WriteLine($"Added property: {newProperty}");
+                    return true;
                 }
+                Trace.WriteLine($"Property was not added: {newProperty}");
+                return false;
             }
-            else Trace.WriteLine($"Property was not added - Invalid inputs.");
+            Trace.WriteLine($"Property was not added - Invalid inputs.");
+            return false;
         }
 
         internal Property FindProperty(string idStr)
@@ -54,7 +56,13 @@ namespace GeodeticPDA.Presenter
             int? id = ToInt(idStr);
             if (id.HasValue)
             {
-                return _system.RemoveProperty(id.Value);
+                if (_system.RemoveProperty(id.Value))
+                {
+                    Trace.WriteLine($"Removed property with Id: {idStr}.");
+                    return true;
+                }
+                Trace.WriteLine($"Property was not removed - id: {idStr}");
+                return false;
             }
             Trace.WriteLine("Invalid ID.");
             return false;
@@ -84,10 +92,22 @@ namespace GeodeticPDA.Presenter
                     Trace.WriteLine($"Updated property: {newProperty}");
                     return true;
                 }
+                Trace.WriteLine($"Poperty was not updated: {newProperty}");
                 return false;
             }
             Trace.WriteLine($"Property was not updated - Invalid inputs.");
             return false;
+        }
+
+        internal void GenerateProperties(string countStr)
+        {
+            int? count = ToInt(countStr);
+            if (count.HasValue)
+            {
+                _system.GenerateProperties(count.Value);
+                Trace.WriteLine("Data generated.");
+            }
+            else Trace.WriteLine("Invalid number of properties.");
         }
 
         internal IEnumerable MainFileItems()
@@ -98,6 +118,11 @@ namespace GeodeticPDA.Presenter
         internal IEnumerable OverfillingFileItems()
         {
             return _system.OverfillingFileItems();
+        }
+
+        internal string GetManagingData()
+        {
+            return _system.GetManagingData();
         }
 
         private double? ToDouble(string str)
