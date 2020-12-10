@@ -7,7 +7,7 @@ namespace GeodeticPDA.Model
     class Property : IData
     {
         private const int DescriptionLength = 20;
-        private static int NextId = 1; // TODO: Need to store it externally
+        public static int NextId { get; set; } = 1;
 
         private readonly ByteInt _id = new ByteInt();
         private readonly ByteInt _number = new ByteInt();
