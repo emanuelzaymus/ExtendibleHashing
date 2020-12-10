@@ -12,13 +12,13 @@ namespace ExtendibleHashing
     {
         private readonly IHashing _hashing;
         private readonly BinaryFileHandler _binFile;
-        private readonly int _blockByteSize;
+        public readonly int BlockByteSize;
 
         public List<int> BlockAddresses { get; private set; } = new List<int>() { 0, 0 }; // adresar
-        private List<int> _blockBitDepths = new List<int>() { 0, 0 }; // hlbky blokov
+        public List<int> BlockBitDepths { get; private set; } = new List<int>() { 0, 0 }; // hlbky blokov
         private List<int> _blockItemCounts = new List<int>() { 0, 0 }; // obsadenie blokov poctom prvkov v blokoch
 
-        private readonly List<bool> _blockOccupation = new List<bool>() { true, false }; // obsadenost blokov
+        public List<bool> BlockOccupation { get; } = new List<bool>() { true, false }; // obsadenost blokov
 
         private int _bitDepth = 1;
         public int BitDepth  // hlbka suboru
@@ -35,23 +35,23 @@ namespace ExtendibleHashing
 
         public DataBlockFile(string filePath, FileMode fileMode, int blockByteSize, ManagingFileHandler managerFile, IHashing hashing, int maxBitDepth)
         {
-            _blockByteSize = blockByteSize;
+            BlockByteSize = blockByteSize;
             MaxBitDepth = maxBitDepth;
 
             if (fileMode != FileMode.Create &&
                 fileMode != FileMode.CreateNew &&
                 managerFile.Read(out int bByteSize, out var bAddresses, out var bBitDepths, out var bItemCounts, out var bOccupation, out int bitDepth, out int mBitDepth))
             {
-                _blockByteSize = bByteSize;
+                BlockByteSize = bByteSize;
                 BlockAddresses = bAddresses;
-                _blockBitDepths = bBitDepths;
+                BlockBitDepths = bBitDepths;
                 _blockItemCounts = bItemCounts;
-                _blockOccupation = bOccupation;
+                BlockOccupation = bOccupation;
                 BitDepth = bitDepth;
                 MaxBitDepth = mBitDepth;
             }
 
-            _binFile = new BinaryFileHandler(filePath, fileMode, _blockByteSize);
+            _binFile = new BinaryFileHandler(filePath, fileMode, BlockByteSize);
             _hashing = hashing;
         }
 
@@ -76,7 +76,7 @@ namespace ExtendibleHashing
         {
             int address = BlockAddresses[index];
             byte[] data = ReadBlock(address);
-            return new DataBlock<T>(index, address, _blockBitDepths[index], data);
+            return new DataBlock<T>(index, address, BlockBitDepths[index], data);
         }
 
         public void Save(DataBlock<T> block)
@@ -97,23 +97,23 @@ namespace ExtendibleHashing
 
         public DataBlock<T> GetNewBlock(int atIndex)
         {
-            int indexOfEmptyBlock = _blockOccupation.IndexOf(false);
-            _blockOccupation[indexOfEmptyBlock] = true;
+            int indexOfEmptyBlock = BlockOccupation.IndexOf(false);
+            BlockOccupation[indexOfEmptyBlock] = true;
             // If there is no more empty blocks -> Add one empty to the end.
-            if (indexOfEmptyBlock + 1 == _blockOccupation.Count)
+            if (indexOfEmptyBlock + 1 == BlockOccupation.Count)
             {
-                _blockOccupation.Add(false);
+                BlockOccupation.Add(false);
             }
-            int newAddress = indexOfEmptyBlock * _blockByteSize;
+            int newAddress = indexOfEmptyBlock * BlockByteSize;
             BlockAddresses[atIndex] = newAddress;
 
-            return new DataBlock<T>(atIndex, newAddress, _blockBitDepths[atIndex], _blockByteSize);
+            return new DataBlock<T>(atIndex, newAddress, BlockBitDepths[atIndex], BlockByteSize);
         }
 
         public void DoubleTheFileSize()
         {
             BlockAddresses = BlockAddresses.DoubleValues();
-            _blockBitDepths = _blockBitDepths.DoubleValues();
+            BlockBitDepths = BlockBitDepths.DoubleValues();
             _blockItemCounts = _blockItemCounts.DoubleValues();
             BitDepth++;
         }
@@ -131,7 +131,7 @@ namespace ExtendibleHashing
             int setNewAddressFromIndex = firstIndexOfAddress + countOfBlocksHavingSameAddress / 2;
 
             // I'm putting firstIndexOfAddress into the oldBlock constructor because block.Index can be from newBlock.Index range
-            DataBlock<T> oldBlock = new DataBlock<T>(firstIndexOfAddress, block.InFileAddress, _blockBitDepths[firstIndexOfAddress], _blockByteSize); // Empty copy of original block
+            DataBlock<T> oldBlock = new DataBlock<T>(firstIndexOfAddress, block.InFileAddress, BlockBitDepths[firstIndexOfAddress], BlockByteSize); // Empty copy of original block
             DataBlock<T> newBlock = GetNewBlock(setNewAddressFromIndex); // Allocate new block
 
             // Update the second half of edited blocks with new block address
@@ -143,7 +143,7 @@ namespace ExtendibleHashing
             void IncrementBlockBitDepths(int indexFrom, int count)
             {
                 for (int i = indexFrom; i < indexFrom + count; i++)
-                    _blockBitDepths[i]++;
+                    BlockBitDepths[i]++;
             }
 
             void SetBlockAdresses(int indexFrom, int count, int newAddress)
@@ -213,10 +213,10 @@ namespace ExtendibleHashing
 
         private bool TryShrinkFile()
         {
-            if (!_blockBitDepths.Contains(BitDepth))
+            if (!BlockBitDepths.Contains(BitDepth))
             {
                 BlockAddresses = BlockAddresses.RemoveEveryOtherValue();
-                _blockBitDepths = _blockBitDepths.RemoveEveryOtherValue();
+                BlockBitDepths = BlockBitDepths.RemoveEveryOtherValue();
                 _blockItemCounts = _blockItemCounts.RemoveEveryOtherValue();
                 BitDepth--;
                 return true;
@@ -262,7 +262,7 @@ namespace ExtendibleHashing
 
         private void ReduceFileSizeIfPossible()
         {
-            _binFile.ReduceSizeIfPossible((_blockOccupation.LastIndexOf(true) + 1) * _blockByteSize);
+            _binFile.ReduceSizeIfPossible((BlockOccupation.LastIndexOf(true) + 1) * BlockByteSize);
         }
 
         private void DecrementBitDepths(DataBlock<T> block)
@@ -271,7 +271,7 @@ namespace ExtendibleHashing
             int lastExclude = first + GetCountOfBlocksHavingSameAddress(block);
             for (int i = first; i < lastExclude; i++)
             {
-                _blockBitDepths[i]--;
+                BlockBitDepths[i]--;
             }
         }
 
@@ -287,14 +287,14 @@ namespace ExtendibleHashing
 
         private void FreeUpBlockAddress(int address)
         {
-            int blockOccupationIndex = address / _blockByteSize;
-            _blockOccupation[blockOccupationIndex] = false;
+            int blockOccupationIndex = address / BlockByteSize;
+            BlockOccupation[blockOccupationIndex] = false;
 
             // If last two blocks are empty remove the last one -> at the end keep one empty for future new DataBlock
-            while (_blockOccupation[_blockOccupation.Count - 1] == false
-                && _blockOccupation[_blockOccupation.Count - 2] == false)
+            while (BlockOccupation[BlockOccupation.Count - 1] == false
+                && BlockOccupation[BlockOccupation.Count - 2] == false)
             {
-                _blockOccupation.RemoveAt(_blockOccupation.Count - 1);
+                BlockOccupation.RemoveAt(BlockOccupation.Count - 1);
             }
         }
 
@@ -323,13 +323,13 @@ namespace ExtendibleHashing
                 int rightNeighbourIndex = firstIndexOfBlockAddress + countOfBlockcHavingSameAddress;
 
                 if (leftNeighbourIndex > 0 &&
-                    block.BitDepth == _blockBitDepths[leftNeighbourIndex] &&
+                    block.BitDepth == BlockBitDepths[leftNeighbourIndex] &&
                     SameBitOnNthPosition(block.Index, leftNeighbourIndex, block.BitDepth))
                 {
                     return leftNeighbourIndex;
                 }
-                else if (rightNeighbourIndex < _blockBitDepths.Count
-                    && block.BitDepth == _blockBitDepths[rightNeighbourIndex]
+                else if (rightNeighbourIndex < BlockBitDepths.Count
+                    && block.BitDepth == BlockBitDepths[rightNeighbourIndex]
                     && SameBitOnNthPosition(block.Index, rightNeighbourIndex, block.BitDepth))
                 {
                     return rightNeighbourIndex;
@@ -346,7 +346,7 @@ namespace ExtendibleHashing
 
         public void SaveManagingData(ManagingFileHandler managingFile)
         {
-            managingFile.Write(_blockByteSize, BlockAddresses, _blockBitDepths, _blockItemCounts, _blockOccupation, BitDepth, MaxBitDepth);
+            managingFile.Write(BlockByteSize, BlockAddresses, BlockBitDepths, _blockItemCounts, BlockOccupation, BitDepth, MaxBitDepth);
         }
 
         public void Dispose()

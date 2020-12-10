@@ -33,6 +33,7 @@ namespace ExtendibleHashing.DataTypes
             String = @string;
         }
 
+        // 4 + 20 * 2 = 44
         public int ByteSize => sizeof(int) + MaxLength * ByteSizeOfCharacter; // byte for actual number of valid characters + MaxLength
 
         public byte[] ToByteArray()

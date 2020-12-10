@@ -5,6 +5,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace ExtendibleHashing
 {
@@ -168,5 +169,59 @@ namespace ExtendibleHashing
         {
             return GetEnumerator();
         }
+
+        public IEnumerable<PresentableBlockItem<T>> MainFileItems()
+        {
+            for (int i = 0; i < _file.BlockOccupation.Count - 1; i++)
+            {
+                int addr = i * _file.BlockByteSize;
+                if (_file.BlockOccupation[i])
+                {
+                    var block = _file.GetDataBlock(addr);
+                    foreach (var item in block)
+                    {
+                        yield return new PresentableBlockItem<T>(i, addr, _file.BlockBitDepths[i], item);
+                    }
+                    for (int j = block.ItemCount; j < block.MaxItemCount; j++)
+                    {
+                        yield return new PresentableBlockItem<T>(i, addr, _file.BlockBitDepths[i], default);
+                    }
+                }
+                else
+                {
+                    yield return new PresentableBlockItem<T>(i, i * _file.BlockByteSize);
+                }
+            }
+        }
+
+        public IEnumerable<PresentableBlockItem<T>> OverfillingFileItems()
+        {
+            if (!_overfillFile.BlockMaxItemCount.HasValue)
+            {
+                yield break;
+            }
+
+            int index = 0;
+            foreach (var block in _overfillFile.GetOverfillingBlocksSequentially())
+            {
+                if (index * block.ByteSize == block.Address)
+                {
+                    foreach (var item in block)
+                    {
+                        yield return new PresentableBlockItem<T>(index, block.Address, item);
+                    }
+                    for (int j = block.Info.ItemCount; j < block.Info.MaxItemCount; j++)
+                    {
+                        yield return new PresentableBlockItem<T>(index, block.Address, default);
+                    }
+                }
+                else
+                {
+                    yield return new PresentableBlockItem<T>(index, index * block.ByteSize);
+                }
+                index++;
+            }
+        }
+
     }
 }

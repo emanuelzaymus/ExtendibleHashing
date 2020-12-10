@@ -224,7 +224,6 @@ namespace ExtendibleHashing
             _file.ReduceSizeIfPossible((_blockOccupation.LastIndexOf(true) + 1) * _blockByteSize);
         }
 
-
         private void Shrink(int mainFileAddress)
         {
             for (int i = 0; i < _blocksInfo.Count; i++)
@@ -358,5 +357,22 @@ namespace ExtendibleHashing
         {
             return GetEnumerator();
         }
+
+        public IEnumerable<OverfillingBlock<T>> GetOverfillingBlocksSequentially()
+        {
+            var infoList = new List<OverfillingBlockInfo>();
+            foreach (var iList in _blocksInfo)
+            {
+                infoList.AddRange(iList);
+            }
+            var sortedByAddress = infoList.OrderBy(x => x.Address);
+            foreach (var info in sortedByAddress)
+            {
+                var block = LoadBlock(info);
+                yield return block;
+            }
+            yield break;
+        }
+
     }
 }

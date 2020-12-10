@@ -14,7 +14,7 @@ namespace ExtendibleHashing.DataTypes
             Int = @int;
         }
 
-        public int ByteSize => sizeof(int);
+        public int ByteSize => sizeof(int); // 4
 
         public byte[] ToByteArray() => BitConverter.GetBytes(Int);
 

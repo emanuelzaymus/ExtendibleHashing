@@ -1,0 +1,43 @@
+﻿<Window x:Class="GeodeticPDA.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:GeodeticPDA"
+        mc:Ignorable="d" ResizeMode="NoResize"
+        Title="MainWindow" Height="600" Width="1000">
+    <Grid>
+        <Label Content="Property:" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top"/>
+        <Label Content="ID:" HorizontalAlignment="Left" Margin="10,41,0,0" VerticalAlignment="Top"/>
+        <Label Content="Number:" HorizontalAlignment="Left" Margin="10,72,0,0" VerticalAlignment="Top"/>
+        <Label Content="Description:" HorizontalAlignment="Left" Margin="10,103,0,0" VerticalAlignment="Top"/>
+        <Label Content="GPS 1:" HorizontalAlignment="Left" Margin="10,134,0,0" VerticalAlignment="Top"/>
+        <Label Content="GPS 2:" HorizontalAlignment="Left" Margin="10,165,0,0" VerticalAlignment="Top"/>
+        <TextBox x:Name="Id" HorizontalAlignment="Left" Margin="91,45,0,0" Text="" TextWrapping="Wrap" VerticalAlignment="Top" Width="245"/>
+        <TextBox x:Name="Number" HorizontalAlignment="Left" Margin="91,76,0,0" Text="" TextWrapping="Wrap" VerticalAlignment="Top" Width="245"/>
+        <TextBox x:Name="Description" HorizontalAlignment="Left" Margin="91,107,0,0" Text="" TextWrapping="Wrap" VerticalAlignment="Top" Width="245"/>
+        <TextBox x:Name="Gps1Latitude" HorizontalAlignment="Left" Margin="91,138,0,0" Text="" TextWrapping="Wrap" VerticalAlignment="Top" Width="120"/>
+        <TextBox x:Name="Gps1Longitude" HorizontalAlignment="Left" Margin="216,138,0,0" Text="" TextWrapping="Wrap" VerticalAlignment="Top" Width="120"/>
+        <TextBox x:Name="Gps2Latitude" HorizontalAlignment="Left" Margin="91,169,0,0" Text="" TextWrapping="Wrap" VerticalAlignment="Top" Width="120"/>
+        <TextBox x:Name="Gps2Longitude" HorizontalAlignment="Left" Margin="216,169,0,0" Text="" TextWrapping="Wrap" VerticalAlignment="Top" Width="120"/>
+        <Button x:Name="AddButton" Content="Add New" HorizontalAlignment="Left" Margin="10,196,0,0" VerticalAlignment="Top" Width="326" Click="AddButton_Click"/>
+        <Button x:Name="FindButton" Content="Find by ID" HorizontalAlignment="Left" Margin="10,221,0,0" VerticalAlignment="Top" Width="326" Click="FindButton_Click"/>
+        <Button x:Name="RemoveButton" Content="Remove by ID" HorizontalAlignment="Left" Margin="10,246,0,0" VerticalAlignment="Top" Width="326" Click="RemoveButton_Click"/>
+        <Button x:Name="SaveChangesButton" Content="Save Changes" HorizontalAlignment="Left" Margin="10,271,0,0" VerticalAlignment="Top" Width="326" Click="SaveChangesButton_Click"/>
+
+        <Label Content="Number of Properties:" HorizontalAlignment="Left" Margin="10,332,0,0" VerticalAlignment="Top"/>
+        <TextBox x:Name="NumberOfProperties" HorizontalAlignment="Left" Margin="142,336,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="194" Text="25"/>
+        <Button x:Name="GeneratePropertiesButton" Content="Generate Properties" HorizontalAlignment="Left" Margin="10,363,0,0" VerticalAlignment="Top" Width="326"/>
+
+        <Label Content="Main file:" HorizontalAlignment="Left" Margin="342,10,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.537,0.495"/>
+        <Border BorderThickness="1" BorderBrush="Black" Margin="342,45,10,269">
+            <ListBox x:Name="MainFileListBox"/>
+        </Border>
+        <Label Content="Overfilling file:" HorizontalAlignment="Left" Margin="342,304,0,0" VerticalAlignment="Top"/>
+        <Border BorderThickness="1" BorderBrush="Black" Margin="342,335,10,10">
+            <ListBox x:Name="OverfillingFileListBox"/>
+        </Border>
+        <Button x:Name="ShowFilesContentButton" Content="Show Files Content" HorizontalAlignment="Left" Margin="10,531,0,0" VerticalAlignment="Top" Width="326" Click="ShowFilesContentButton_Click"/>
+
+    </Grid>
+</Window>

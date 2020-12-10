@@ -7,7 +7,7 @@ namespace ExtendibleHashing
 {
     class DataBlock<T> : IBinarySerializable, IEnumerable<T> where T : IData, new()
     {
-        private const int ValidItemsCountByteSize = sizeof(int);
+        private const int ValidItemsCountByteSize = sizeof(int); // 4
 
         private readonly int _blockByteSize;
         private readonly int _itemByteSize;
@@ -140,5 +140,6 @@ namespace ExtendibleHashing
             }
             return false;
         }
+
     }
 }
