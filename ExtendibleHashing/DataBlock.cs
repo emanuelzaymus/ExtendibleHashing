@@ -47,6 +47,10 @@ namespace ExtendibleHashing
         /// <param name="data"></param>
         public DataBlock(byte[] data) : this(-1, -1, -1, data) { }
 
+        /// <summary>
+        /// Adds item to the block.
+        /// </summary>
+        /// <param name="item"></param>
         public void Add(T item)
         {
             if (Contains(item))
@@ -59,6 +63,11 @@ namespace ExtendibleHashing
             else throw new Exception("DataBlock is full, you cannot add more items.");
         }
 
+        /// <summary>
+        /// Finds item based on <paramref name="itemId"/>.
+        /// </summary>
+        /// <param name="itemId"></param>
+        /// <returns></returns>
         public T Find(T itemId)
         {
             List<T> foundItems = _items.FindAll(i => i.IdEquals(itemId));
@@ -73,11 +82,21 @@ namespace ExtendibleHashing
             throw new Exception("There is more items with the same IDs.");
         }
 
+        /// <summary>
+        /// True is there is present item with id of <paramref name="itemId"/>.
+        /// </summary>
+        /// <param name="itemId"></param>
+        /// <returns></returns>
         public bool Contains(T itemId)
         {
             return Find(itemId) != null;
         }
 
+        /// <summary>
+        /// Removes from block.
+        /// </summary>
+        /// <param name="itemId"></param>
+        /// <returns>Success</returns>
         public bool Remove(T itemId)
         {
             if (Contains(itemId))
@@ -128,6 +147,11 @@ namespace ExtendibleHashing
             return GetEnumerator();
         }
 
+        /// <summary>
+        /// Updates <paramref name="newItem"/> if exists in the block.
+        /// </summary>
+        /// <param name="newItem"></param>
+        /// <returns>Success</returns>
         internal bool Update(T newItem)
         {
             for (int i = 0; i < _items.Count; i++)

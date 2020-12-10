@@ -18,12 +18,18 @@ namespace GeodeticPDA
             InitializeComponent();
         }
 
+        /// <summary>
+        /// Adds property.
+        /// </summary>
         private void AddButton_Click(object sender, RoutedEventArgs e)
         {
             _presenter.AddProperty(Id.Text, Number.Text, Description.Text,
                 Gps1Latitude.Text, Gps1Longitude.Text, Gps2Latitude.Text, Gps2Longitude.Text);
         }
 
+        /// <summary>
+        /// Find property by it's Id.
+        /// </summary>
         private void FindButton_Click(object sender, RoutedEventArgs e)
         {
             Property p = _presenter.FindProperty(Id.Text);
@@ -46,6 +52,9 @@ namespace GeodeticPDA
             }
         }
 
+        /// <summary>
+        /// Removes property by it's Id if such a property exists.
+        /// </summary>
         private void RemoveButton_Click(object sender, RoutedEventArgs e)
         {
             if (_presenter.RemoveProperty(Id.Text))
@@ -54,6 +63,9 @@ namespace GeodeticPDA
             }
         }
 
+        /// <summary>
+        /// Updates changes for edited property.
+        /// </summary>
         private void SaveChangesButton_Click(object sender, RoutedEventArgs e)
         {
             bool success = _presenter.SaveChanges(_editedPropertyId, Id.Text, Number.Text, Description.Text,
@@ -64,11 +76,17 @@ namespace GeodeticPDA
             }
         }
 
+        /// <summary>
+        /// Generates random properties.
+        /// </summary>
         private void GeneratePropertiesButton_Click(object sender, RoutedEventArgs e)
         {
             _presenter.GenerateProperties(NumberOfProperties.Text);
         }
 
+        /// <summary>
+        /// Displays the whole content of all files.
+        /// </summary>
         private void ShowFilesContentButton_Click(object sender, RoutedEventArgs e)
         {
             MainFileListBox.ItemsSource = _presenter.MainFileItems();

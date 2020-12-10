@@ -17,12 +17,21 @@ namespace ExtendibleHashing
             base.FromByteArray(data, 0);
         }
 
+        /// <summary>
+        /// Adds item to the block.
+        /// </summary>
+        /// <param name="item"></param>
         internal void Add(T item)
         {
             _items.Add(item);
             Info.ItemCount++;
         }
 
+        /// <summary>
+        /// Finds item based on <paramref name="itemId"/>.
+        /// </summary>
+        /// <param name="itemId"></param>
+        /// <returns></returns>
         internal T Find(T itemId)
         {
             foreach (var item in _items)
@@ -33,6 +42,11 @@ namespace ExtendibleHashing
             return default;
         }
 
+        /// <summary>
+        /// Removes from block.
+        /// </summary>
+        /// <param name="itemId"></param>
+        /// <returns>Success</returns>
         internal bool Remove(T itemId)
         {
             for (int i = 0; i < _items.Count; i++)
@@ -47,6 +61,11 @@ namespace ExtendibleHashing
             return false;
         }
 
+        /// <summary>
+        /// Updates <paramref name="newItem"/> if exists in the block.
+        /// </summary>
+        /// <param name="newItem"></param>
+        /// <returns>Success</returns>
         internal bool Update(T newItem)
         {
             for (int i = 0; i < _items.Count; i++)

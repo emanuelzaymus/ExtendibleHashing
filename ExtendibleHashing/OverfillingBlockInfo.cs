@@ -1,5 +1,8 @@
 ﻿namespace ExtendibleHashing
 {
+    /// <summary>
+    /// Overfilling block information.
+    /// </summary>
     class OverfillingBlockInfo
     {
         public int MaxItemCount { get; set; }

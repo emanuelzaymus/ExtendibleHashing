@@ -35,6 +35,9 @@ namespace GeodeticPDA.Model
             }
         }
 
+        /// <summary>
+        /// Adds property.
+        /// </summary>
         internal bool AddProperty(Property newProperty)
         {
             try
@@ -49,16 +52,25 @@ namespace GeodeticPDA.Model
             }
         }
 
+        /// <summary>
+        /// Find property by it's Id.
+        /// </summary>
         internal Property FindProperty(int id)
         {
             return _file.Find(new PropertyId(id));
         }
 
+        /// <summary>
+        /// Removes property by it's Id if such a property exists.
+        /// </summary>
         internal bool RemoveProperty(int id)
         {
             return _file.Remove(new PropertyId(id));
         }
 
+        /// <summary>
+        /// Updates changes for edited property.
+        /// </summary>
         internal bool UpdateProperty(int oldId, Property newProperty)
         {
             if (oldId == newProperty.Id)
@@ -74,6 +86,9 @@ namespace GeodeticPDA.Model
             return false;
         }
 
+        /// <summary>
+        /// Generates random properties.
+        /// </summary>
         internal void GenerateProperties(int count)
         {
             foreach (var item in RandomPropertyGenerator.GenerateProperties(count))
@@ -82,16 +97,25 @@ namespace GeodeticPDA.Model
             }
         }
 
+        /// <summary>
+        /// Gets all main file items.
+        /// </summary>
         internal IEnumerable MainFileItems()
         {
             return _file.MainFileItems();
         }
 
+        /// <summary>
+        /// Gets all overfilling file items.
+        /// </summary>
         internal IEnumerable OverfillingFileItems()
         {
             return _file.OverfillingFileItems();
         }
 
+        /// <summary>
+        /// Gets managing data.
+        /// </summary>
         internal string GetManagingData()
         {
             return _file.GetManagingData();

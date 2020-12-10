@@ -30,6 +30,10 @@ namespace ExtendibleHashing
             _overfillFile = new OverfillingBlockFile<T>(overfillingFilePath, fileMode, overfillingBlockByteSize, _overfillingManagingFile);
         }
 
+        /// <summary>
+        /// Adds <paramref name="item"/> into the file if such item doe not exist.
+        /// </summary>
+        /// <param name="item"></param>
         public void Add(T item)
         {
             while (true)
@@ -66,6 +70,11 @@ namespace ExtendibleHashing
             }
         }
 
+        /// <summary>
+        /// Finds item based on id of <paramref name="itemId"/> or null.
+        /// </summary>
+        /// <param name="itemId"></param>
+        /// <returns></returns>
         public T Find(T itemId)
         {
             var block = _file.GetDataBlock(itemId);
@@ -77,6 +86,11 @@ namespace ExtendibleHashing
             return foundItem;
         }
 
+        /// <summary>
+        /// Removes item with id of <paramref name="itemId"/> and returns success.
+        /// </summary>
+        /// <param name="itemId"></param>
+        /// <returns></returns>
         public bool Remove(T itemId)
         {
             bool wasRemoved;
@@ -122,6 +136,12 @@ namespace ExtendibleHashing
             return wasRemoved;
         }
 
+        /// <summary>
+        /// Updates <paramref name="oldItem"/> with <paramref name="newItem"/>. Both items have to have the same Ids.
+        /// </summary>
+        /// <param name="oldItem"></param>
+        /// <param name="newItem"></param>
+        /// <returns></returns>
         public bool Update(T oldItem, T newItem)
         {
             if (!oldItem.IdEquals(newItem))
@@ -138,6 +158,9 @@ namespace ExtendibleHashing
             return _overfillFile.Update(block.InFileAddress, newItem);
         }
 
+        /// <summary>
+        /// Saves all managing dat and disposses all files.
+        /// </summary>
         public void Dispose()
         {
             _file.SaveManagingData(_managingFile);

@@ -8,6 +8,9 @@ using System.IO;
 
 namespace ExtendibleHashing
 {
+    /// <summary>
+    /// Main binary file that consists of DataBlocks.
+    /// </summary>
     class DataBlockFile<T> : IDisposable where T : IData, new()
     {
         private readonly IHashing _hashing;
@@ -79,6 +82,10 @@ namespace ExtendibleHashing
             return new DataBlock<T>(index, address, BlockBitDepths[index], data);
         }
 
+        /// <summary>
+        /// Saves <paramref name="block"/>.
+        /// </summary>
+        /// <param name="block"></param>
         public void Save(DataBlock<T> block)
         {
             UpdateBlockItemCounts(block);
@@ -95,6 +102,11 @@ namespace ExtendibleHashing
             }
         }
 
+        /// <summary>
+        /// Gets new block at index <paramref name="atIndex"/>.
+        /// </summary>
+        /// <param name="atIndex"></param>
+        /// <returns></returns>
         public DataBlock<T> GetNewBlock(int atIndex)
         {
             int indexOfEmptyBlock = BlockOccupation.IndexOf(false);
@@ -110,6 +122,9 @@ namespace ExtendibleHashing
             return new DataBlock<T>(atIndex, newAddress, BlockBitDepths[atIndex], BlockByteSize);
         }
 
+        /// <summary>
+        /// Doubles addresses, does not afect the binary file.
+        /// </summary>
         public void DoubleTheFileSize()
         {
             BlockAddresses = BlockAddresses.DoubleValues();
@@ -118,6 +133,10 @@ namespace ExtendibleHashing
             BitDepth++;
         }
 
+        /// <summary>
+        /// Splits <paramref name="block"/> into two blocks and saves them.
+        /// </summary>
+        /// <param name="block"></param>
         public void Split(DataBlock<T> block)
         {
             // Find first index of this block addres
@@ -190,6 +209,12 @@ namespace ExtendibleHashing
             return (int)Math.Pow(2, BitDepth - block.BitDepth);
         }
 
+        /// <summary>
+        /// Merges.
+        /// </summary>
+        /// <param name="block"></param>
+        /// <param name="addressesWithOverfillingBlocks"></param>
+        /// <returns></returns>
         public bool TryMergeAndSave(DataBlock<T> block, List<int> addressesWithOverfillingBlocks)
         {
             bool saved = false;

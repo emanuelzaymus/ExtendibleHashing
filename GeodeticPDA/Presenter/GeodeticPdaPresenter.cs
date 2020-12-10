@@ -9,6 +9,9 @@ namespace GeodeticPDA.Presenter
     {
         private GeodeticPdaSystem _system = new GeodeticPdaSystem();
 
+        /// <summary>
+        /// Adds property.
+        /// </summary>
         internal bool AddProperty(string idStr, string numberStr, string desc,
             string gps1LatitudeStr, string gps1LongitudeStr, string gps2LatitudeStr, string gps2LongitudeStr)
         {
@@ -40,6 +43,9 @@ namespace GeodeticPDA.Presenter
             return false;
         }
 
+        /// <summary>
+        /// Find property by it's Id.
+        /// </summary>
         internal Property FindProperty(string idStr)
         {
             int? id = ToInt(idStr);
@@ -51,6 +57,9 @@ namespace GeodeticPDA.Presenter
             return null;
         }
 
+        /// <summary>
+        /// Removes property by it's Id if such a property exists.
+        /// </summary>
         internal bool RemoveProperty(string idStr)
         {
             int? id = ToInt(idStr);
@@ -68,6 +77,9 @@ namespace GeodeticPDA.Presenter
             return false;
         }
 
+        /// <summary>
+        /// Updates changes for edited property.
+        /// </summary>
         internal bool SaveChanges(int oldId, string newIdStr, string numberStr, string desc,
             string gps1LatitudeStr, string gps1LongitudeStr, string gps2LatitudeStr, string gps2LongitudeStr)
         {
@@ -99,6 +111,9 @@ namespace GeodeticPDA.Presenter
             return false;
         }
 
+        /// <summary>
+        /// Generates random properties.
+        /// </summary>
         internal void GenerateProperties(string countStr)
         {
             int? count = ToInt(countStr);
@@ -110,16 +125,25 @@ namespace GeodeticPDA.Presenter
             else Trace.WriteLine("Invalid number of properties.");
         }
 
+        /// <summary>
+        /// Gets all main file items.
+        /// </summary>
         internal IEnumerable MainFileItems()
         {
             return _system.MainFileItems();
         }
 
+        /// <summary>
+        /// Gets all overfilling file items.
+        /// </summary>
         internal IEnumerable OverfillingFileItems()
         {
             return _system.OverfillingFileItems();
         }
 
+        /// <summary>
+        /// Gets managing data.
+        /// </summary>
         internal string GetManagingData()
         {
             return _system.GetManagingData();

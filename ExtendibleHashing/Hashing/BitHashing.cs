@@ -8,6 +8,12 @@ namespace ExtendibleHashing.Hashing
     {
         private const int MaxBitDepth = sizeof(int) * 8; // 4 * 8 = 32
 
+        /// <summary>
+        /// Returns number from first <paramref name="bitDepth"/> least significant bits - reversed.
+        /// </summary>
+        /// <param name="hashCode"></param>
+        /// <param name="bitDepth"></param>
+        /// <returns></returns>
         public int HashCodeToIndex(int hashCode, int bitDepth)
         {
             if (bitDepth > MaxBitDepth)

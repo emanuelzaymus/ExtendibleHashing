@@ -48,6 +48,11 @@ namespace ExtendibleHashing
             _file = new BinaryFileHandler(overfillingFilePath, fileMode, _blockByteSize);
         }
 
+        /// <summary>
+        /// Adds <paramref name="item"/> to the sequence of <paramref name="mainFileAddress"/>.
+        /// </summary>
+        /// <param name="mainFileAddress"></param>
+        /// <param name="item"></param>
         internal void Add(int mainFileAddress, T item)
         {
             if (ContainsItem(mainFileAddress, item))
@@ -113,6 +118,11 @@ namespace ExtendibleHashing
             return new OverfillingBlock<T>(_blockByteSize, blockInfo, data);
         }
 
+        /// <summary>
+        /// True if contains any item under <paramref name="mainFileAddress"/> address.
+        /// </summary>
+        /// <param name="mainFileAddress"></param>
+        /// <returns></returns>
         internal bool ContainsAddress(int mainFileAddress)
         {
             return GetBlocksInfoSeries(mainFileAddress) != null;
@@ -128,6 +138,12 @@ namespace ExtendibleHashing
             return ret;
         }
 
+        /// <summary>
+        /// Finds item with id of <paramref name="itemId"/> under address <paramref name="mainFileAddress"/>.
+        /// </summary>
+        /// <param name="mainFileAddress"></param>
+        /// <param name="itemId"></param>
+        /// <returns></returns>
         internal T Find(int mainFileAddress, T itemId)
         {
             List<OverfillingBlockInfo> infoList = GetBlocksInfoSeries(mainFileAddress);
@@ -144,6 +160,12 @@ namespace ExtendibleHashing
             return default;
         }
 
+        /// <summary>
+        /// Removes item with id of <paramref name="itemId"/> under address <paramref name="mainFileAddress"/>.
+        /// </summary>
+        /// <param name="mainFileAddress"></param>
+        /// <param name="itemId"></param>
+        /// <returns></returns>
         internal bool Remove(int mainFileAddress, T itemId)
         {
             List<OverfillingBlockInfo> infoList = GetBlocksInfoSeries(mainFileAddress);
@@ -162,6 +184,12 @@ namespace ExtendibleHashing
             return false;
         }
 
+        /// <summary>
+        /// Shrinks the file.
+        /// </summary>
+        /// <param name="mainFileAddress"></param>
+        /// <param name="countToReturn"></param>
+        /// <returns></returns>
         internal List<T> ShrinkAndGetItems(int mainFileAddress, int countToReturn)
         {
             List<OverfillingBlockInfo> infoList = GetBlocksInfoSeries(mainFileAddress);
@@ -201,6 +229,12 @@ namespace ExtendibleHashing
             return ret;
         }
 
+        /// <summary>
+        /// Updates item  <paramref name="newItem"/> under address <paramref name="mainFileAddress"/>.
+        /// </summary>
+        /// <param name="mainFileAddress"></param>
+        /// <param name="itemId"></param>
+        /// <returns></returns>
         internal bool Update(int mainFileAddress, T newItem)
         {
             List<OverfillingBlockInfo> infoList = GetBlocksInfoSeries(mainFileAddress);
