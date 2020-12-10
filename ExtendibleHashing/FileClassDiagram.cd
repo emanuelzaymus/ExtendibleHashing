@@ -1,0 +1,111 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="ExtendibleHashing.ExtendibleHashingFile&lt;T&gt;">
+    <Position X="6.25" Y="2.75" Width="2.25" />
+    <Compartments>
+      <Compartment Name="Fields" Collapsed="true" />
+    </Compartments>
+    <TypeIdentifier>
+      <HashCode>AAYAAAEAACAAABAAgAAABAAAQAAIAgAEAAAAAAAAEBQ=</HashCode>
+      <FileName>ExtendibleHashingFile.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="ExtendibleHashing.DataBlockFile&lt;T&gt;" Collapsed="true">
+    <Position X="9.25" Y="2.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAMAQCCAFBCAAEMAQwAADAACAgIG0AYEIACgAgIA=</HashCode>
+      <FileName>DataBlockFile.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="ExtendibleHashing.DataBlock&lt;T&gt;" Collapsed="true">
+    <Position X="11" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAZACAEAAAAAABAAEIAABAABABCIAAAcCgEAAAAQQAA=</HashCode>
+      <FileName>DataBlock.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="ExtendibleHashing.OverfillingBlockFile&lt;T&gt;" Collapsed="true">
+    <Position X="11.25" Y="4.25" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAYAAMAAASAJEHACAwAwBAABAEEIAQAHAgAAAACAHAA=</HashCode>
+      <FileName>OverfillingBlockFile.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="ExtendibleHashing.OverfillingBlock&lt;T&gt;" Collapsed="true">
+    <Position X="9.25" Y="5.25" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAYAAAAAAAAAAAAAAAAABAAAAAAIAAAAAAAAAEAAAAA=</HashCode>
+      <FileName>OverfillingBlock.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ExtendibleHashing.OverfillingBlockInfo" Collapsed="true">
+    <Position X="11.5" Y="5.5" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AABACAEAAAAAAAAAAAAAAAAAAAAAAAAKAAAAAAAAAAA=</HashCode>
+      <FileName>OverfillingBlockInfo.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ExtendibleHashing.Hashing.BitHashing" Collapsed="true">
+    <Position X="7" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAEAAAAAAAAAAAAAAAAAAAAEAAAEAAAAAAAAAAAA=</HashCode>
+      <FileName>Hashing\BitHashing.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="ExtendibleHashing.FileHandlers.BinaryFileHandler" Collapsed="true">
+    <Position X="9.25" Y="4" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAIAAACAAAAAAAAAAAAAAAAAAAAAAAgAAACAAEIA=</HashCode>
+      <FileName>FileHandlers\BinaryFileHandler.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="ExtendibleHashing.FileHandlers.ManagingFileHandler" Collapsed="true">
+    <Position X="4" Y="4.25" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAEAAAA=</HashCode>
+      <FileName>FileHandlers\ManagingFileHandler.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ExtendibleHashing.FileHandlers.OverfillingManagingFileHandler" Collapsed="true">
+    <Position X="2.5" Y="5.25" Width="2.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAEAAAA=</HashCode>
+      <FileName>FileHandlers\OverfillingManagingFileHandler.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ExtendibleHashing.FileHandlers.TextFileHandler" Collapsed="true">
+    <Position X="3.5" Y="3" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAACAAAAAAAAAAAAAAAAABAAAAAAAAAAAAA=</HashCode>
+      <FileName>FileHandlers\TextFileHandler.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Interface Name="ExtendibleHashing.Hashing.IHashing" Collapsed="true">
+    <Position X="7" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAA=</HashCode>
+      <FileName>Hashing\IHashing.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="ExtendibleHashing.DataInterfaces.IBinarySerializable" Collapsed="true">
+    <Position X="4.25" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAACAAAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAAAAQAA=</HashCode>
+      <FileName>DataInterfaces\IBinarySerializable.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="ExtendibleHashing.DataInterfaces.IData" Collapsed="true">
+    <Position X="4.25" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>DataInterfaces\IData.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

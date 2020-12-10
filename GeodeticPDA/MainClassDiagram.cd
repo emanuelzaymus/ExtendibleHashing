@@ -1,0 +1,94 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="GeodeticPDA.MainWindow" Collapsed="true">
+    <Position X="4.5" Y="0.75" Width="1.75" />
+    <Compartments>
+      <Compartment Name="Fields" Collapsed="true" />
+    </Compartments>
+    <TypeIdentifier>
+      <HashCode>AAAAAgAAgQAAACAAABAAAAgAQAAAACAACAQAAAAAAAA=</HashCode>
+      <FileName>MainWindow.xaml.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="GeodeticPDA.Presenter.GeodeticPdaPresenter" Collapsed="true">
+    <Position X="4.5" Y="2" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>gAAAAAEAACAAAAAAAEAAAAAAQAAAAgAYABgEAAABAAA=</HashCode>
+      <FileName>Presenter\GeodeticPdaPresenter.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="GeodeticPDA.Model.GeodeticPdaSystem">
+    <Position X="4.5" Y="3" Width="1.75" />
+    <Compartments>
+      <Compartment Name="Fields" Collapsed="true" />
+    </Compartments>
+    <TypeIdentifier>
+      <HashCode>AAAAABEAAKAAAAAAAEAAAAAAQAAAAkAcAABBAEABEAA=</HashCode>
+      <FileName>Model\GeodeticPdaSystem.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="GeodeticPDA.Model.Property">
+    <Position X="7" Y="3.75" Width="1.5" />
+    <Compartments>
+      <Compartment Name="Fields" Collapsed="true" />
+      <Compartment Name="Methods" Collapsed="true" />
+    </Compartments>
+    <TypeIdentifier>
+      <HashCode>AAACCAAAAAAgEAAEgMBUAAAQAAAAAIAAAAAAAABAQAA=</HashCode>
+      <FileName>Model\Property.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="GeodeticPDA.Model.GpsCoordinates">
+    <Position X="7" Y="1" Width="1.5" />
+    <Compartments>
+      <Compartment Name="Fields" Collapsed="true" />
+      <Compartment Name="Methods" Collapsed="true" />
+    </Compartments>
+    <TypeIdentifier>
+      <HashCode>AAAACAAAAEAAAAAEgIAIAAAAAAAAAIAAAAAAAAAAUAA=</HashCode>
+      <FileName>Model\GpsCoordinates.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="ExtendibleHashing.ExtendibleHashingFile&lt;T&gt;">
+    <Position X="1.75" Y="3.75" Width="2.25" />
+    <TypeIdentifier />
+  </Class>
+  <Class Name="ExtendibleHashing.DataTypes.ByteString">
+    <Position X="9.25" Y="5.25" Width="1.5" />
+    <Compartments>
+      <Compartment Name="Methods" Collapsed="true" />
+    </Compartments>
+    <TypeIdentifier />
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="ExtendibleHashing.DataTypes.ByteInt">
+    <Position X="11.25" Y="4.5" Width="1.5" />
+    <Compartments>
+      <Compartment Name="Methods" Collapsed="true" />
+    </Compartments>
+    <TypeIdentifier />
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="ExtendibleHashing.DataTypes.ByteDouble">
+    <Position X="11.25" Y="2.25" Width="1.5" />
+    <Compartments>
+      <Compartment Name="Methods" Collapsed="true" />
+    </Compartments>
+    <TypeIdentifier />
+    <Lollipop Position="0.2" />
+  </Class>
+  <Interface Name="ExtendibleHashing.DataInterfaces.IBinarySerializable" Collapsed="true">
+    <Position X="9.25" Y="0.5" Width="1.5" />
+    <TypeIdentifier />
+  </Interface>
+  <Interface Name="ExtendibleHashing.DataInterfaces.IData" Collapsed="true">
+    <Position X="9.25" Y="1.75" Width="1.5" />
+    <TypeIdentifier />
+  </Interface>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>
