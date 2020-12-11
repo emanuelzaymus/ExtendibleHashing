@@ -63,9 +63,13 @@ namespace ExtendibleHashing
                 }
                 else
                 {
-                    block.Add(item);
-                    _file.Save(block);
-                    break;
+                    if (!_overfillFile.ContainsItem(block.InFileAddress, item))
+                    {
+                        block.Add(item);
+                        _file.Save(block);
+                        break;
+                    }
+                    else throw new ArgumentException("This item is already present in the file.");
                 }
             }
         }

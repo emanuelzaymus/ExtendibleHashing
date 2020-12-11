@@ -74,7 +74,7 @@ namespace ExtendibleHashing
             Save(block);
         }
 
-        private bool ContainsItem(int mainFileAddress, T item)
+        public bool ContainsItem(int mainFileAddress, T item)
         {
             List<OverfillingBlockInfo> infoList = GetBlocksInfoSeries(mainFileAddress);
             if (infoList != null)
